@@ -1,0 +1,36 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.swp
+
+# Django
+*.log
+db.sqlite3
+staticfiles/
+mediafiles/
+*.pot
+
+# Virtual Environment
+venv/
+env/
+.env*
+
+# Covarage
+coverage/
+.coverage
+.coveragerc
+coverage.xml
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# System Files
+.DS_Store
+Thumbs.db
+
+CHEAT*/
