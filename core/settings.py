@@ -16,13 +16,15 @@ DEBUG = env("DEBUG", default=True)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
+
+INTERNAL_IPS = env.list("INTERNAL_IPS", default=["127.0.0.1"])  # localhost
+
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
     default=["http://localhost:4200"],  # Angular
 )
 
-INTERNAL_IPS = env.list("INTERNAL_IPS", default=["127.0.0.1"])  # localhost
-
+CORS_ALLOW_CREDENTIALS = env.bool("CORS_ALLOW_CREDENTIALS", default=True)
 
 # Application definition
 INSTALLED_APPS = [
@@ -33,6 +35,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework_simplejwt",
     "corsheaders",
     "debug_toolbar",
     "import_export",
@@ -120,4 +123,9 @@ RQ_QUEUES = {
         "DB": env("RQ_DB", default=0),
         "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=360),
     }
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
