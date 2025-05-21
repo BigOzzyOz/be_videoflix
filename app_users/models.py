@@ -20,6 +20,10 @@ class CustomUserModel(AbstractUser):
     last_login = models.DateTimeField(null=True, blank=True, verbose_name="Last login")
     role = models.CharField(choices=ROLE_CHOICES, max_length=50, default="user", verbose_name="Role")
     user_infos = models.TextField(blank=True, null=True, verbose_name="User info notes")
+    is_email_verified = models.BooleanField(default=False, verbose_name="Email verified")
+    email_verification_token = models.UUIDField(null=True, blank=True, editable=False, default=None)
+    password_reset_token = models.UUIDField(null=True, blank=True, editable=False, default=None)
+    password_reset_token_created_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = "User"
@@ -30,9 +34,9 @@ class CustomUserModel(AbstractUser):
         return self.username
 
 
-class UserProfile(models.Model):
+class UserProfiles(models.Model):
     """
-    User profile model that extends the CustomUserModel.
+    User profiles model that extends the CustomUserModel.
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name="Profile ID")

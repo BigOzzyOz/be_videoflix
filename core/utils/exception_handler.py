@@ -17,24 +17,30 @@ def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
     if response is not None:
-        return Response({"error": exc.__class__.__name__, "detail": response.data}, status=response.status_code)
+        # If DRF's default handler provides a response, use its data directly
+        # This ensures that the original error structure (e.g., for ValidationError)
+        # is preserved, which is what many tests expect.
+        return Response(response.data, status=response.status_code)
 
+    # Custom handling for specific unhandled exceptions or to standardize other errors
     if isinstance(exc, (NotFound, Http404, ObjectDoesNotExist)):
-        return Response({"error": "NotFound", "detail": str(exc)}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": str(exc)}, status=status.HTTP_404_NOT_FOUND)
 
     if isinstance(exc, PermissionDenied):
-        return Response({"error": "PermissionDenied", "detail": str(exc)}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"detail": str(exc)}, status=status.HTTP_403_FORBIDDEN)
 
-    if isinstance(exc, ValidationError):
-        return Response({"error": "ValidationError", "detail": exc.detail}, status=status.HTTP_400_BAD_REQUEST)
+    # It's generally better to let DRF handle ValidationErrors, but if one slips through:
+    if isinstance(exc, ValidationError):  # This might be redundant if response above catches it
+        return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
 
     if isinstance(exc, (AuthenticationFailed, NotAuthenticated)):
-        return Response({"error": "AuthenticationFailed", "detail": str(exc)}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({"detail": str(exc)}, status=status.HTTP_401_UNAUTHORIZED)
 
     if isinstance(exc, MethodNotAllowed):
-        return Response({"error": "MethodNotAllowed", "detail": str(exc)}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response({"detail": str(exc)}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+    # Default catch-all for unhandled exceptions
     return Response(
-        {"error": "InternalServerError", "detail": "Internal server error."},
+        {"detail": "Internal server error."},
         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
     )

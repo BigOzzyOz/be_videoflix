@@ -1,10 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUserModel, UserProfile
+from .models import CustomUserModel, UserProfiles
 
 
 class UserProfileInline(admin.TabularInline):
-    model = UserProfile
+    model = UserProfiles
     extra = 0
     max_num = 4
     can_delete = True
@@ -35,7 +35,7 @@ class CustomUserAdmin(UserAdmin):
     display_profiles.short_description = "Profiles"
 
 
-@admin.register(UserProfile)
+@admin.register(UserProfiles)
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ("profile_name", "user", "is_kid", "preferred_language")
     list_filter = ("is_kid", "preferred_language")
