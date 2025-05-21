@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "import_export",
     "django_rq",
     "drf_yasg",
+    "app_users",
+    "app_videos",
 ]
 
 MIDDLEWARE = [
@@ -77,6 +79,9 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 # Database
 DATABASES = {"default": env.db(default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")}
+
+# User model
+AUTH_USER_MODEL = "app_users.CustomUserModel"
 
 
 # Password validation
@@ -128,4 +133,5 @@ RQ_QUEUES = {
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "EXCEPTION_HANDLER": "core.utils.exception_handler.custom_exception_handler",
 }
