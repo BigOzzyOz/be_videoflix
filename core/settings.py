@@ -165,7 +165,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
-    # TODO: Configure your actual email backend for production here
+    # TODO: Configure actual email backend for production here
     # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     # EMAIL_HOST = env('EMAIL_HOST', default='localhost')
     # EMAIL_PORT = env('EMAIL_PORT', default=587)

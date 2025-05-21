@@ -1,9 +1,9 @@
+import uuid
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.tokens import RefreshToken
-import uuid
+from app_users.models import UserProfiles
 
 CustomUserModel = get_user_model()
 
@@ -35,7 +35,6 @@ class EmailVerifyViewTests(APITestCase):
         self.assertTrue(self.user.is_email_verified)
         self.assertIsNone(self.user.email_verification_token)
 
-        # Check if profile was created
         self.assertTrue(self.user.profiles.exists())
         profile = self.user.profiles.first()
         self.assertEqual(profile.profile_name, self.user.username)
@@ -60,30 +59,25 @@ class EmailVerifyViewTests(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["detail"], "Invalid or expired verification token.")
-        # User should remain active, but token should not be processed again
+
         self.user.refresh_from_db()
         self.assertTrue(self.user.is_active)
-        self.assertFalse(self.user.is_email_verified)  # Was not changed by this failed attempt
-        self.assertEqual(self.user.email_verification_token, self.verification_token)  # Token still there
+        self.assertFalse(self.user.is_email_verified)
+        self.assertEqual(self.user.email_verification_token, self.verification_token)
 
     def test_email_verification_token_already_used_or_cleared(self):
-        # Simulate successful verification first
         url_success = reverse(self.verify_url_name, kwargs={"token": str(self.verification_token)})
-        self.client.get(url_success)  # First successful call
+        self.client.get(url_success)
         self.user.refresh_from_db()
         self.assertTrue(self.user.is_active)
         self.assertTrue(self.user.is_email_verified)
         self.assertIsNone(self.user.email_verification_token)
 
-        # Attempt to use the same token again (it's now None in DB)
         response_again = self.client.get(url_success)
         self.assertEqual(response_again.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_again.data["detail"], "Invalid or expired verification token.")
 
     def test_email_verification_profile_already_exists(self):
-        # Create a profile for the user before verification
-        from app_users.models import UserProfiles
-
         UserProfiles.objects.create(user=self.user, profile_name="existing_profile")
 
         url = reverse(self.verify_url_name, kwargs={"token": str(self.verification_token)})
@@ -94,6 +88,5 @@ class EmailVerifyViewTests(APITestCase):
         self.assertTrue(self.user.is_email_verified)
         self.assertIsNone(self.user.email_verification_token)
 
-        # Ensure no new profile was created, and the existing one remains
         self.assertEqual(self.user.profiles.count(), 1)
         self.assertEqual(self.user.profiles.first().profile_name, "existing_profile")

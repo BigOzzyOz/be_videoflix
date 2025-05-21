@@ -30,9 +30,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-        validated_data.pop("password", None)  # Remove password if present, but don't use it
+        validated_data.pop("password", None)
 
-        # Prevent username changes after creation, as it's set to email
         validated_data.pop("username", None)
 
         for attr, value in validated_data.items():
@@ -44,15 +43,15 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
-    email = serializers.EmailField(required=True)  # Ensure email is explicitly required
-    first_name = serializers.CharField(required=False, allow_blank=True)  # Optional
-    last_name = serializers.CharField(required=False, allow_blank=True)  # Optional
+    email = serializers.EmailField(required=True)
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = CustomUserModel
         fields = ("id", "email", "password", "password2", "first_name", "last_name")
         read_only_fields = ("id",)
-        extra_kwargs = {  # Ensure all required fields are explicitly marked if not by default
+        extra_kwargs = {
             "email": {"required": True},
             "password": {"required": True},
             "password2": {"required": True},
@@ -64,7 +63,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         Since username will be the email, this also checks username uniqueness.
         """
         if CustomUserModel.objects.filter(email=value).exists():
-            # This implicitly also means a user with this username (email) exists.
             raise serializers.ValidationError("This email address is already in use.")
         return value
 
@@ -74,9 +72,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        # Set username to the email
         user = CustomUserModel.objects.create_user(
-            username=validated_data["email"],  # Set username as email
+            username=validated_data["email"],
             email=validated_data["email"],
             first_name=validated_data.get("first_name", ""),
             last_name=validated_data.get("last_name", ""),
@@ -114,7 +111,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)  # Ensure email is required
+    email = serializers.EmailField(required=True)
 
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
@@ -125,15 +122,14 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     def validate_new_password(self, value):
         try:
             validate_password(value)
-        except serializers.ValidationError as e:  # Catch Django's ValidationError
-            raise serializers.ValidationError(list(e.messages))  # Convert to DRF's ValidationError
+        except serializers.ValidationError as e:
+            raise serializers.ValidationError(list(e.messages))
         return value
 
     def validate(self, attrs):
         if attrs["new_password"] != attrs["new_password2"]:
             raise serializers.ValidationError({"non_field_errors": ["Password fields didn't match."]})
 
-        # Validate token format as UUID here
         try:
             uuid.UUID(attrs["token"])
         except ValueError:

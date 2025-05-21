@@ -4,7 +4,6 @@ from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth import get_user_model
 from app_users.models import UserProfiles
 from rest_framework_simplejwt.tokens import RefreshToken
-import uuid
 
 CustomUserModel = get_user_model()
 
@@ -12,7 +11,6 @@ CustomUserModel = get_user_model()
 class UserProfileViewsTests(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        # User 1 with some profiles
         cls.user1 = CustomUserModel.objects.create_user(
             username="profileuser1",
             email="profile1@example.com",
@@ -23,7 +21,6 @@ class UserProfileViewsTests(APITestCase):
         cls.profile1_user1 = UserProfiles.objects.create(user=cls.user1, profile_name="Profile1.1")
         cls.profile2_user1 = UserProfiles.objects.create(user=cls.user1, profile_name="Profile1.2", is_kid=True)
 
-        # User 2 (will be used to test permissions)
         cls.user2 = CustomUserModel.objects.create_user(
             username="profileuser2",
             email="profile2@example.com",
@@ -35,19 +32,17 @@ class UserProfileViewsTests(APITestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.list_create_url = reverse("user_profile_list_create")  # /me/profiles/
+        self.list_create_url = reverse("user_profile_list_create")
 
     def _authenticate_user(self, user):
         refresh = RefreshToken.for_user(user)
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {str(refresh.access_token)}")
 
-    # --- UserProfileListCreateView Tests ---
-
     def test_list_user_profiles_authenticated(self):
         self._authenticate_user(self.user1)
         response = self.client.get(self.list_create_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)  # User1 has 2 profiles
+        self.assertEqual(len(response.data), 2)
         profile_names = [p["profile_name"] for p in response.data]
         self.assertIn("Profile1.1", profile_names)
         self.assertIn("Profile1.2", profile_names)
@@ -74,7 +69,6 @@ class UserProfileViewsTests(APITestCase):
 
     def test_create_user_profile_max_limit(self):
         self._authenticate_user(self.user1)
-        # User1 already has 2 profiles. Create 2 more to reach limit of 4.
         UserProfiles.objects.create(user=self.user1, profile_name="LimitTest1")
         UserProfiles.objects.create(user=self.user1, profile_name="LimitTest2")
         self.assertEqual(UserProfiles.objects.filter(user=self.user1).count(), 4)
@@ -82,9 +76,9 @@ class UserProfileViewsTests(APITestCase):
         data = {"profile_name": "OverLimitProfile"}
         response = self.client.post(self.list_create_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("detail", response.data)  # Default error key for ValidationError
+        self.assertIn("detail", response.data)
         self.assertEqual(str(response.data["detail"]), "You can only have a maximum of 4 profiles.")
-        self.assertEqual(UserProfiles.objects.filter(user=self.user1).count(), 4)  # Should not have created
+        self.assertEqual(UserProfiles.objects.filter(user=self.user1).count(), 4)
 
     def test_create_user_profile_missing_profile_name(self):
         self._authenticate_user(self.user1)
@@ -93,8 +87,6 @@ class UserProfileViewsTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("profile_name", response.data)
         self.assertEqual(response.data["profile_name"][0].code, "required")
-
-    # --- UserProfileDetailView Tests ---
 
     def _get_detail_url(self, profile_id):
         return reverse("user_profile_detail", kwargs={"profile_id": profile_id})
@@ -113,16 +105,16 @@ class UserProfileViewsTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_profile_detail_authenticated_not_owner(self):
-        self._authenticate_user(self.user2)  # Authenticate as user2
-        url = self._get_detail_url(self.profile1_user1.id)  # Try to access user1's profile
+        self._authenticate_user(self.user2)
+        url = self._get_detail_url(self.profile1_user1.id)
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)  # get_object_or_404 due to queryset filtering
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_profile_detail_authenticated_owner(self):
         self._authenticate_user(self.user1)
         url = self._get_detail_url(self.profile1_user1.id)
         update_data = {"profile_name": "Updated Name 1.1", "is_kid": True}
-        response = self.client.patch(url, update_data, format="json")  # PATCH for partial update
+        response = self.client.patch(url, update_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.profile1_user1.refresh_from_db()
         self.assertEqual(self.profile1_user1.profile_name, "Updated Name 1.1")
@@ -132,13 +124,11 @@ class UserProfileViewsTests(APITestCase):
     def test_update_profile_detail_put_requires_all_fields_or_partial_true(self):
         self._authenticate_user(self.user1)
         url = self._get_detail_url(self.profile1_user1.id)
-        # PUT usually requires all fields unless serializer is partial=True by default for PUT
-        # or the view explicitly handles it. Generic views with DRF handle PATCH for partial.
-        update_data = {"profile_name": "PUT Update Name"}  # Missing other fields
+        update_data = {"profile_name": "PUT Update Name"}
         response = self.client.put(url, update_data, format="json")
-        if response.status_code == status.HTTP_400_BAD_REQUEST:  # Expected if not partial
+        if response.status_code == status.HTTP_400_BAD_REQUEST:
             for field in ["picture", "is_kid", "preferred_language", "age_limit"]:
-                if field not in update_data:  # Check only for fields not provided
+                if field not in update_data:
                     self.assertIn(
                         field,
                         response.data,
@@ -179,7 +169,7 @@ class UserProfileViewsTests(APITestCase):
 
     def test_delete_profile_detail_not_owner(self):
         self._authenticate_user(self.user2)
-        url = self._get_detail_url(self.profile2_user1.id)  # user1's profile
+        url = self._get_detail_url(self.profile2_user1.id)
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertTrue(UserProfiles.objects.filter(id=self.profile2_user1.id).exists())  # Should not be deleted
+        self.assertTrue(UserProfiles.objects.filter(id=self.profile2_user1.id).exists())

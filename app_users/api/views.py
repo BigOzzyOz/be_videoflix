@@ -18,7 +18,7 @@ from app_users.utils import send_verification_email, send_password_reset_email
 import uuid
 from django.utils import timezone
 from datetime import timedelta
-from django.conf import settings  # Import settings
+from django.conf import settings
 
 CustomUserModel = get_user_model()
 
@@ -111,7 +111,7 @@ class LogoutView(APIView):
             token.blacklist()
             return Response(status=status.HTTP_205_RESET_CONTENT)
         except Exception:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PasswordResetRequestView(generics.GenericAPIView):
