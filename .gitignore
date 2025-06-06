@@ -9,7 +9,8 @@ __pycache__/
 *.log
 db.sqlite3
 staticfiles/
-mediafiles/
+staticfiles
+media/
 *.pot
 
 # Virtual Environment
@@ -17,7 +18,7 @@ venv/
 env/
 .env*
 
-# Covarage
+# Coverage
 coverage/
 .coverage
 .coveragerc
@@ -33,4 +34,11 @@ coverage.xml
 .DS_Store
 Thumbs.db
 
+# Docker
+*.pid
+*.tar
+*.log
+docker-compose.override.yml
+
+# Eigene Notizordner
 CHEAT*/
