@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 if [ "$ENV" = "production" ]; then
   echo "Running in PRODUCTION mode"

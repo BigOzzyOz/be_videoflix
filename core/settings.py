@@ -64,7 +64,7 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -116,10 +116,8 @@ SIMPLE_JWT = {
     "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
     "JTI_CLAIM": "jti",
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),  # Beibehalten für den Fall, dass Sliding Tokens verwendet werden
-    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(
-        days=1
-    ),  # Beibehalten für den Fall, dass Sliding Tokens verwendet werden
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
 
 
@@ -140,7 +138,7 @@ USE_TZ = True
 
 
 # Password reset token timeout in hours
-PASSWORD_RESET_TIMEOUT_HOURS = 1
+PASSWORD_RESET_TIMEOUT_HOURS = 24
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -162,18 +160,14 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Email Backend for Development (prints emails to console)
-if DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-else:
-    # TODO: Configure actual email backend for production here
-    # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    # EMAIL_HOST = env('EMAIL_HOST', default='localhost')
-    # EMAIL_PORT = env('EMAIL_PORT', default=587)
-    # EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True)
-    # EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
-    # EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
-    # DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
-    pass  # Placeholder for production email settings
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = env("EMAIL_HOST", default="localhost")
+EMAIL_PORT = int(env("EMAIL_PORT", default=25))
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env("EMAIL_USE_TLS", default="False") == "True"
+EMAIL_USE_SSL = env("EMAIL_USE_SSL", default="False") == "True"
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
 
 
 # RQ settings
