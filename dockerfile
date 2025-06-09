@@ -7,7 +7,8 @@ WORKDIR /app
 # 3. Systemabhängigkeiten (für Pillow, PostgreSQL etc.)
 RUN apt-get update && apt-get install -y \
     libpq-dev gcc python3-dev musl-dev \
-    libjpeg-dev zlib1g-dev && \
+    libjpeg-dev zlib1g-dev \
+    ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 # 4. Install requirements

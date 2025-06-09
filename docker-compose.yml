@@ -28,6 +28,20 @@ services:
       - db
       - redis
 
+  rqworker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python manage.py rqworker
+    environment:
+      ENV: development
+    volumes:
+      - .:/app
+    env_file: .env
+    depends_on:
+      - redis
+      - db
+
   mailhog:
     image: mailhog/mailhog
     ports:
