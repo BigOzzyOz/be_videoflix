@@ -8,7 +8,7 @@ class VideoFileInline(admin.TabularInline):
     extra = 1
 
     readonly_fields = ("thumbnail_preview", "duration")
-    fields = ("original_file", "resolution", "language", "is_default", "is_ready", "thumbnail_preview", "duration")
+    fields = ("original_file", "language", "is_default", "is_ready", "thumbnail_preview", "duration")
 
     def thumbnail_preview(self, obj):
         if obj.thumbnail:
@@ -32,7 +32,6 @@ class VideoAdmin(admin.ModelAdmin):
 class VideoFileAdmin(admin.ModelAdmin):
     list_display = (
         "video",
-        "resolution",
         "language",
         "is_ready",
         "is_default",
@@ -41,7 +40,7 @@ class VideoFileAdmin(admin.ModelAdmin):
         "duration",
     )
     readonly_fields = ("thumbnail_preview", "duration")
-    list_filter = ("is_ready", "language", "resolution")
+    list_filter = ("is_ready", "language")
     search_fields = ("video__title",)
     raw_id_fields = ("video",)
     ordering = ("-created_at",)

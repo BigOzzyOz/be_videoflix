@@ -1,8 +1,10 @@
+import uuid
 from django.db import models
 from django.utils.text import slugify
 
 
 class Video(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name="Video ID")
     title = models.CharField(max_length=255)
     genre = models.CharField(max_length=100, blank=True, help_text="Genre des Videos")
     description = models.TextField(blank=True)
@@ -25,22 +27,30 @@ class Video(models.Model):
 
 
 class VideoFile(models.Model):
+    LANGUAGE_CHOICES = (
+        ("en", "English"),
+        ("de", "Deutsch"),
+        ("fr", "Français"),
+        ("es", "Español"),
+        ("it", "Italiano"),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name="Video File ID")
     video = models.ForeignKey(Video, on_delete=models.CASCADE, related_name="video_files")
     duration = models.DurationField(blank=True, null=True, help_text="Videolänge")
     thumbnail = models.ImageField(upload_to="thumbnails/", blank=True, null=True)
     preview_file = models.FileField(upload_to="previews/", blank=True, null=True, help_text="Vorschau-Video")
     original_file = models.FileField(upload_to="uploads/")
     hls_master_path = models.URLField(blank=True, null=True)
-    resolution = models.CharField(max_length=20, blank=True, help_text="z. B. 1080p, 720p")
-    language = models.CharField(max_length=50, default="en")
+    language = models.CharField(choices=LANGUAGE_CHOICES, default="en")
     is_default = models.BooleanField(default=False)
     is_ready = models.BooleanField(default=False, help_text="HLS-Conversion abgeschlossen")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ("video", "resolution", "language")
-        ordering = ["resolution"]
+        unique_together = ("video", "language")
+        ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.video.title} – {self.resolution or 'Original'} [{self.language}]"
+        return f"{self.video.title} – [{self.language}]"
