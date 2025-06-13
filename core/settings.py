@@ -173,9 +173,7 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
 # RQ settings
 RQ_QUEUES = {
     "default": {
-        "HOST": env("RQ_HOST", default="localhost"),
-        "PORT": env("RQ_PORT", default=6379),
-        "DB": env("RQ_DB", default=0),
+        "URL": env("RQ_URL", default="redis://localhost:6379/0"),
         "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=360),
     }
 }
