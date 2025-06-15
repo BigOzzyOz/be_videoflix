@@ -41,7 +41,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python manage.py rqworker default
+    command: python manage.py rqworker default low high --with-scheduler
     environment:
       ENV: development
       REDIS_URL: redis://redis:6379

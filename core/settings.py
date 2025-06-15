@@ -132,7 +132,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Berlin"
 USE_I18N = True
 USE_TZ = True
 
@@ -175,5 +175,13 @@ RQ_QUEUES = {
     "default": {
         "URL": env("RQ_URL", default="redis://localhost:6379/0"),
         "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=360),
-    }
+    },
+    "low": {
+        "URL": env("RQ_URL", default="redis://localhost:6379/0"),
+        "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=21600),  # 6 hours
+    },
+    "high": {
+        "URL": env("RQ_URL", default="redis://localhost:6379/0"),
+        "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=21600),  # 6 hours
+    },
 }
