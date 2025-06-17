@@ -35,7 +35,8 @@ def custom_exception_handler(exc, context):
     if isinstance(exc, MethodNotAllowed):
         return Response({"detail": str(exc)}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+    (print(f"Unhandled exception: {exc}"),)
     return Response(
-        {"detail": "Internal server error."},
+        {"detail": "Internal server error. "},
         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
     )

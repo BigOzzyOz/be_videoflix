@@ -1,9 +1,9 @@
-import subprocess
+import time
 import os
+import subprocess
 from datetime import timedelta
 from django.core.files.base import ContentFile
 from django.conf import settings
-import time
 from tempfile import NamedTemporaryFile
 from .models import VideoFile
 

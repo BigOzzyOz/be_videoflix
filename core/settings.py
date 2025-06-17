@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "import_export",
     "django_rq",
+    "django_filters",
     "drf_yasg",
     "app_users",
     "app_videos",
@@ -90,6 +91,11 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "EXCEPTION_HANDLER": "core.utils.exception_handler.custom_exception_handler",
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ),
 }
 
 # Simple JWT settings
