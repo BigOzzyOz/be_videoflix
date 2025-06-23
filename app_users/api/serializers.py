@@ -104,6 +104,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             "username": self.user.username,
             "email": self.user.email,
             "role": self.user.role,
+            "profiles": UserProfileSerializer(self.user.profiles.all(), many=True).data,
             "first_name": self.user.first_name,
             "last_name": self.user.last_name,
         }
