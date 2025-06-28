@@ -1,12 +1,11 @@
 from django.contrib import admin
-from .models import Video, VideoFile
 from django.utils.html import format_html
+from .models import Video, VideoFile, Genre
 
 
 class VideoFileInline(admin.TabularInline):
     model = VideoFile
     extra = 1
-
     readonly_fields = ("thumbnail_preview", "duration")
     fields = ("original_file", "language", "is_default", "is_ready", "thumbnail_preview", "duration")
 
@@ -20,12 +19,18 @@ class VideoFileInline(admin.TabularInline):
 
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
-    list_display = ("title", "is_published", "release_date", "created_at")
-    list_filter = ("is_published", "release_date")
+    list_display = ("title", "get_genres", "is_published", "release_date", "created_at")
+    list_filter = ("is_published", "release_date", "genre")
     search_fields = ("title", "description")
     prepopulated_fields = {"slug": ("title",)}
     ordering = ("-created_at",)
-    inlines = [VideoFileInline]  # Inline VideoFile im Video Admin anzeigen
+    inlines = [VideoFileInline]
+    filter_horizontal = ("genre",)
+
+    def get_genres(self, obj):
+        return ", ".join([genre.name for genre in obj.genre.all()])
+
+    get_genres.short_description = "Genres"
 
 
 @admin.register(VideoFile)
@@ -51,3 +56,9 @@ class VideoFileAdmin(admin.ModelAdmin):
         return "-"
 
     thumbnail_preview.short_description = "Thumbnail"
+
+
+@admin.register(Genre)
+class GenreAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)

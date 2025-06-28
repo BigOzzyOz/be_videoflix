@@ -3,10 +3,17 @@ from django.db import models
 from django.utils.text import slugify
 
 
+class Genre(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Video(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name="Video ID")
     title = models.CharField(max_length=255)
-    genre = models.CharField(max_length=100, blank=True, help_text="Genre des Videos")
+    genre = models.ManyToManyField(Genre, related_name="videos", blank=True, verbose_name="Genres")
     description = models.TextField(blank=True)
     slug = models.SlugField(unique=True, blank=True)
     release_date = models.DateField(blank=True, null=True)
