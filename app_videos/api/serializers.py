@@ -42,7 +42,7 @@ class VideoFileSerializer(serializers.ModelSerializer):
             return self.context["request"].build_absolute_uri(obj.hls_master_path)
         return None
 
-    def get_genre(self, obj):
+    def get_genres(self, obj):
         if obj.video.genres.exists():
             return [g.name for g in obj.video.genres.all()]
         return []
