@@ -15,6 +15,7 @@ class VideoFileSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "title",
+            "description",
             "genres",
             "language",
             "duration",

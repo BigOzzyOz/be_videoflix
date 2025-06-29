@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.utils.text import slugify
+from django.utils import timezone
 
 
 class Genres(models.Model):
@@ -33,6 +34,13 @@ class Video(models.Model):
         return self.title
 
 
+class VideoFileManager(models.Manager):
+    def published_and_ready(self):
+        return self.filter(
+            is_ready=True, video__is_published=True, video__release_date__lte=timezone.now()
+        ).select_related("video")
+
+
 class VideoFile(models.Model):
     LANGUAGE_CHOICES = (
         ("en", "English"),
@@ -54,6 +62,8 @@ class VideoFile(models.Model):
     is_ready = models.BooleanField(default=False, help_text="HLS-Conversion abgeschlossen")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = VideoFileManager()
 
     class Meta:
         unique_together = ("video", "language")
