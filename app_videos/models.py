@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.text import slugify
 
 
-class Genre(models.Model):
+class Genres(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
@@ -13,7 +13,7 @@ class Genre(models.Model):
 class Video(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name="Video ID")
     title = models.CharField(max_length=255)
-    genre = models.ManyToManyField(Genre, related_name="videos", blank=True, verbose_name="Genres")
+    genres = models.ManyToManyField(Genres, related_name="videos", blank=True, verbose_name="Genres")
     description = models.TextField(blank=True)
     slug = models.SlugField(unique=True, blank=True)
     release_date = models.DateField(blank=True, null=True)
@@ -44,7 +44,7 @@ class VideoFile(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name="Video File ID")
     video = models.ForeignKey(Video, on_delete=models.CASCADE, related_name="video_files")
-    duration = models.DurationField(blank=True, null=True, help_text="Videolänge")
+    duration = models.FloatField(default=0.0, help_text="Dauer des Videos in Sekunden")
     thumbnail = models.ImageField(upload_to="thumbnails/", blank=True, null=True)
     preview_file = models.FileField(upload_to="previews/", blank=True, null=True, help_text="Vorschau-Video")
     original_file = models.FileField(upload_to="uploads/")

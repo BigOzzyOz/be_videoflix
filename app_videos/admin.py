@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Video, VideoFile, Genre
+from .models import Video, VideoFile, Genres
 
 
 class VideoFileInline(admin.TabularInline):
@@ -20,15 +20,15 @@ class VideoFileInline(admin.TabularInline):
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
     list_display = ("title", "get_genres", "is_published", "release_date", "created_at")
-    list_filter = ("is_published", "release_date", "genre")
+    list_filter = ("is_published", "release_date", "genres")
     search_fields = ("title", "description")
     prepopulated_fields = {"slug": ("title",)}
     ordering = ("-created_at",)
     inlines = [VideoFileInline]
-    filter_horizontal = ("genre",)
+    filter_horizontal = ("genres",)
 
     def get_genres(self, obj):
-        return ", ".join([genre.name for genre in obj.genre.all()])
+        return ", ".join([genres.name for genres in obj.genres.all()])
 
     get_genres.short_description = "Genres"
 
@@ -58,7 +58,7 @@ class VideoFileAdmin(admin.ModelAdmin):
     thumbnail_preview.short_description = "Thumbnail"
 
 
-@admin.register(Genre)
+@admin.register(Genres)
 class GenreAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)

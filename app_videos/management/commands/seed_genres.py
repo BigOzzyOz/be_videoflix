@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from app_videos.models import Genre
+from app_videos.models import Genres
 
 
 class Command(BaseCommand):
@@ -28,8 +28,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         created = 0
-        for genre_name in self.GENRES:
-            obj, was_created = Genre.objects.get_or_create(name=genre_name)
+        for genres_name in self.GENRES:
+            obj, was_created = Genres.objects.get_or_create(name=genres_name)
             if was_created:
                 created += 1
         self.stdout.write(self.style.SUCCESS(f"{created} genres created."))

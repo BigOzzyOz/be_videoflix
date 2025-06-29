@@ -1,7 +1,6 @@
 import time
 import os
 import subprocess
-from datetime import timedelta
 from django.core.files.base import ContentFile
 from django.conf import settings
 from tempfile import NamedTemporaryFile
@@ -301,7 +300,8 @@ def _get_video_duration(video_file):
 
     if duration_str:
         try:
-            duration_seconds = float(duration_str)
-            video_file.duration = timedelta(seconds=duration_seconds)
+            video_file.duration = float(duration_str)
         except ValueError as e:
             print(f"Error parsing video duration: {e}")
+    else:
+        video_file.duration = 0.0

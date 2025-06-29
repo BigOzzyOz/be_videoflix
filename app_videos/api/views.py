@@ -1,7 +1,7 @@
 from django.db.models import Count
 from rest_framework import generics
 from rest_framework.response import Response
-from app_videos.models import VideoFile, Genre
+from app_videos.models import VideoFile, Genres
 from .filters import VideoFileFilter
 from .serializers import VideoFileSerializer
 from .pagination import VideoPagination
@@ -26,6 +26,6 @@ class VideoFileSummaryView(generics.RetrieveAPIView):
 
 class GenreVideoCountView(generics.RetrieveAPIView):
     def get(self, request):
-        queryset = Genre.objects.annotate(video_count=Count("videos"))
-        data = {genre.name.lower(): genre.video_count for genre in queryset}
+        queryset = Genres.objects.annotate(video_count=Count("videos"))
+        data = {genres.name.lower(): genres.video_count for genres in queryset}
         return Response(data)
