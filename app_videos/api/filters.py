@@ -14,11 +14,10 @@ class VideoFileFilter(filters.FilterSet):
     newly_released = filters.BooleanFilter(field_name="video__release_date", method="filter_newly_released")
     language = CharInFilter(field_name="language", lookup_expr="in")
     is_ready = filters.BooleanFilter()
-    is_default = filters.BooleanFilter()
 
     class Meta:
         model = VideoFile
-        fields = ["title", "genres", "published", "newly_released", "language", "is_ready", "is_default"]
+        fields = ["title", "genres", "published", "newly_released", "language", "is_ready"]
 
     def filter_newly_released(self, queryset, name, value):
         if value:

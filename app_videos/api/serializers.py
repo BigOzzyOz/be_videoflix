@@ -7,8 +7,9 @@ class VideoFileSerializer(serializers.ModelSerializer):
     preview_url = serializers.SerializerMethodField()
     hls_url = serializers.SerializerMethodField()
     genres = serializers.SerializerMethodField()
-    title = serializers.CharField(source="video.title", read_only=True)
-    description = serializers.CharField(source="video.description", read_only=True)
+    available_languages = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
 
     class Meta:
         model = VideoFile
@@ -18,12 +19,12 @@ class VideoFileSerializer(serializers.ModelSerializer):
             "description",
             "genres",
             "language",
+            "available_languages",
             "duration",
             "thumbnail_url",
             "preview_url",
             "hls_url",
             "is_ready",
-            "is_default",
             "created_at",
             "updated_at",
         ]
@@ -47,3 +48,16 @@ class VideoFileSerializer(serializers.ModelSerializer):
         if obj.video.genres.exists():
             return [g.name for g in obj.video.genres.all()]
         return []
+
+    def get_available_languages(self, obj):
+        """Returns all available languages with their VideoFile IDs"""
+        video_files = obj.video.video_files.filter(is_ready=True)
+        return {vf.language: str(vf.id) for vf in video_files}
+
+    def get_title(self, obj):
+        """Returns localized title if available, otherwise original title"""
+        return obj.display_title
+
+    def get_description(self, obj):
+        """Returns localized description if available, otherwise original description"""
+        return obj.display_description
