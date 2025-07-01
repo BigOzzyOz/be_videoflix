@@ -4,8 +4,7 @@ from django.conf import settings
 from django.utils import timezone
 import uuid
 
-BASE_URL = "http://localhost:8000"
-
+BASE_URL = "http://localhost:4200"
 
 
 def send_verification_email(user, request):

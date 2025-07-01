@@ -19,12 +19,7 @@ class VideoFileDetailView(generics.RetrieveAPIView):
     serializer_class = VideoFileSerializer
 
 
-class VideoFileSummaryView(generics.RetrieveAPIView):
-    queryset = VideoFile.objects.published_and_ready()
-    serializer_class = VideoFileSerializer
-
-
-class GenreVideoCountView(generics.RetrieveAPIView):
+class GenreVideoCountView(generics.GenericAPIView):
     def get(self, request):
         queryset = Genres.objects.annotate(video_count=Count("videos"))
         data = {genres.name.lower(): genres.video_count for genres in queryset}

@@ -1,4 +1,9 @@
+import uuid
+from datetime import timedelta
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils import timezone
+from django.utils.translation import get_language_from_request
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
@@ -15,10 +20,6 @@ from app_users.api.serializers import (
 )
 from app_users.models import UserProfiles
 from app_users.utils import send_verification_email, send_password_reset_email
-import uuid
-from django.utils import timezone
-from datetime import timedelta
-from django.conf import settings
 
 CustomUserModel = get_user_model()
 
@@ -57,12 +58,21 @@ class EmailVerifyView(APIView):
         user.save()
 
         if not UserProfiles.objects.filter(user=user).exists():
-            UserProfiles.objects.create(user=user, profile_name=user.username)
+            browser_language = get_language_from_request(request)
+            preferred_language = self.map_browser_to_video_language(browser_language)
+
+            UserProfiles.objects.create(user=user, profile_name=user.username, preferred_language=preferred_language)
 
         return Response(
             {"message": "Email successfully verified. You can now login."},
             status=status.HTTP_200_OK,
         )
+
+    def map_browser_to_video_language(self, browser_lang):
+        """Map browser language to VideoFile language choices"""
+        lang_code = browser_lang.split("-")[0].lower() if browser_lang else "en"
+        language_mapping = {"de": "de", "en": "en", "fr": "fr", "es": "es", "it": "it"}
+        return language_mapping.get(lang_code, "en")
 
 
 class UserDetailView(generics.RetrieveUpdateAPIView):

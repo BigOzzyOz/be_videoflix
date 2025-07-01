@@ -46,7 +46,7 @@ class UserProfiles(models.Model):
         upload_to="profile_pictures/", blank=True, null=True, verbose_name="Profile picture"
     )
     is_kid = models.BooleanField(default=False, verbose_name="Child profile")
-    preferred_language = models.CharField(max_length=10, default="de", verbose_name="Preferred language")
+    preferred_language = models.CharField(max_length=10, default="en", verbose_name="Preferred language")
 
     class Meta:
         verbose_name = "User Profile"
