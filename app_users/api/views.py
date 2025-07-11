@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.views import APIView
 from app_users.api.serializers import (
     RegisterSerializer,
@@ -113,15 +114,19 @@ class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class LogoutView(APIView):
     permission_classes = (permissions.AllowAny,)
+    authentication_classes = []
 
     def post(self, request):
-        try:
-            refresh_token = request.data["refresh_token"]
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-            return Response(status=status.HTTP_205_RESET_CONTENT)
-        except Exception:
-            return Response({"detail": "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+        refresh_token = request.data.get("refresh_token")
+
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            except TokenError:
+                pass
+
+        return Response({"message": "Successfully logged out"}, status=status.HTTP_200_OK)
 
 
 class PasswordResetRequestView(generics.GenericAPIView):
