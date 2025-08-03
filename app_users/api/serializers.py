@@ -9,11 +9,71 @@ CustomUserModel = get_user_model()
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    video_progress = serializers.SerializerMethodField()
+    watch_statistics = serializers.SerializerMethodField()
+
     class Meta:
         model = UserProfiles
-        fields = ["id", "profile_name", "profile_picture", "is_kid", "preferred_language"]
-        read_only_fields = ["id"]
-        extra_kwargs = {"profile_name": {"required": True, "allow_blank": False}}
+        fields = [
+            "id",
+            "profile_name",
+            "preferred_language",
+            "video_progress",
+            "watch_statistics",
+        ]
+
+    def get_video_progress(self, obj):
+        """All video progress with status"""
+        progress_qs = obj.video_progress.select_related("video_file__video").order_by("-last_watched")
+
+        return [
+            {
+                "video_file_id": str(p.video_file.id),
+                "title": p.video_file.display_title,
+                "thumbnail_url": (
+                    self.context["request"].build_absolute_uri(p.video_file.thumbnail.url)
+                    if p.video_file.thumbnail and self.context.get("request")
+                    else (p.video_file.thumbnail.url if p.video_file.thumbnail else None)
+                ),
+                "current_time": p.current_time,
+                "progress_percentage": round(p.progress_percentage, 1),
+                "duration": p.video_file.duration,
+                "status": p.status,
+                "is_completed": p.is_completed,
+                "is_started": p.is_started,
+                "completion_count": p.completion_count,
+                "total_watch_time": p.total_watch_time,
+                "first_watched": p.first_watched,
+                "last_watched": p.last_watched,
+                "last_completed": p.last_completed,
+            }
+            for p in progress_qs
+        ]
+
+    def get_watch_statistics(self, obj):
+        """Watch statistics from video progress"""
+        from django.db.models import Sum
+
+        progress_qs = obj.video_progress.all()
+        started_time = progress_qs.filter(is_started=True).aggregate(total=Sum("current_time"))["total"] or 0
+        completed_time = progress_qs.aggregate(total=Sum("total_watch_time"))["total"] or 0
+        total_watch_time = started_time + completed_time
+
+        return {
+            "total_videos_started": progress_qs.filter(is_started=True).count(),
+            "total_videos_completed": progress_qs.filter(completion_count__gt=0).count(),
+            "total_completions": sum(p.completion_count for p in progress_qs),
+            "total_watch_time": round(total_watch_time, 1),
+            "unique_videos_watched": progress_qs.filter(is_started=True).count(),
+            "completion_rate": round(
+                (
+                    progress_qs.filter(completion_count__gt=0).count()
+                    / max(progress_qs.filter(is_started=True).count(), 1)
+                )
+                * 100,
+                1,
+            ),
+        }
 
 
 class CustomUserSerializer(serializers.ModelSerializer):

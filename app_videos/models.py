@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.utils.text import slugify
 from django.utils import timezone
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Genres(models.Model):
@@ -82,3 +83,68 @@ class VideoFile(models.Model):
     def display_description(self):
         """Returns localized description if available, otherwise falls back to video description"""
         return self.localized_description or self.video.description
+
+
+class VideoProgress(models.Model):
+    profile = models.ForeignKey("app_users.UserProfiles", on_delete=models.CASCADE, related_name="video_progress")
+    video_file = models.ForeignKey(VideoFile, on_delete=models.CASCADE, related_name="progress_entries")
+
+    current_time = models.FloatField(
+        default=0.0, validators=[MinValueValidator(0.0)], help_text="Current playback position in seconds"
+    )
+
+    progress_percentage = models.FloatField(
+        default=0.0,
+        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)],
+        help_text="Progress as percentage (0-100)",
+    )
+
+    is_completed = models.BooleanField(default=False)
+    is_started = models.BooleanField(default=False)
+    completion_count = models.PositiveIntegerField(default=0)
+    total_watch_time = models.FloatField(default=0.0)
+
+    first_watched = models.DateTimeField(null=True, blank=True)
+    last_watched = models.DateTimeField(auto_now=True)
+    last_completed = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("profile", "video_file")
+        ordering = ["-last_watched"]
+
+    def save(self, *args, **kwargs):
+        if not self.first_watched and self.current_time > 0:
+            self.first_watched = timezone.now()
+
+        if self.video_file.duration > 0:
+            self.progress_percentage = (self.current_time / self.video_file.duration) * 100
+
+            was_completed = self.is_completed
+            self.is_completed = self.progress_percentage >= 90
+            self.is_started = self.current_time > 5
+
+            if self.is_completed and not was_completed:
+                self.completion_count += 1
+                self.is_started = False
+                self.last_completed = timezone.now()
+                self.total_watch_time += self.video_file.duration
+            elif not self.is_completed and was_completed:
+                pass
+
+        super().save(*args, **kwargs)
+
+    @property
+    def status(self):
+        """Returns the current status of the video"""
+        if self.is_completed:
+            return "completed"
+        elif self.is_started and self.progress_percentage >= 5:
+            return "continue_watching"
+        elif self.is_started:
+            return "just_started"
+        else:
+            return "not_started"
+
+    def __str__(self):
+        return f"{self.profile.profile_name} - {self.video_file.display_title} ({self.progress_percentage:.1f}%)"

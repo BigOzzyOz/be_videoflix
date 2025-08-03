@@ -11,6 +11,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
 from app_users.api.serializers import (
     RegisterSerializer,
     CustomUserSerializer,
@@ -21,6 +22,7 @@ from app_users.api.serializers import (
 )
 from app_users.models import UserProfiles
 from app_users.utils import send_verification_email, send_password_reset_email
+from app_videos.models import VideoFile, VideoProgress
 
 CustomUserModel = get_user_model()
 
@@ -185,3 +187,48 @@ class PasswordResetConfirmView(generics.GenericAPIView):
         user.save()
 
         return Response({"message": "Password has been reset successfully."}, status=status.HTTP_200_OK)
+
+
+class VideoProgressUpdateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, profile_id, video_file_id):
+        """Update video progress for a specific profile"""
+        profile = get_object_or_404(UserProfiles, id=profile_id, user=request.user)
+        video_file = get_object_or_404(VideoFile, id=video_file_id)
+        current_time = request.data.get("current_time")
+
+        if current_time is None:
+            raise ValidationError({"current_time": "This field is required."})
+
+        try:
+            current_time = float(current_time)
+        except (ValueError, TypeError):
+            raise ValidationError({"current_time": "Must be a valid number."})
+
+        if current_time < 0:
+            raise ValidationError({"current_time": "Cannot be negative."})
+
+        progress, created = VideoProgress.objects.get_or_create(
+            profile=profile, video_file=video_file, defaults={"current_time": current_time}
+        )
+
+        progress.current_time = current_time
+        progress.save()
+
+        serializer = UserProfileSerializer(profile, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, profile_id, video_file_id):
+        """Delete video progress for a specific profile"""
+        profile = get_object_or_404(UserProfiles, id=profile_id, user=request.user)
+
+        try:
+            progress = VideoProgress.objects.get(profile=profile, video_file_id=video_file_id)
+            progress.delete()
+
+            serializer = UserProfileSerializer(profile, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except VideoProgress.DoesNotExist:
+            raise ValidationError({"detail": "No progress found for this video."})
