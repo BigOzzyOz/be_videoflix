@@ -4,6 +4,8 @@ from django.conf import settings
 from django.utils import timezone
 import uuid
 
+BASE_URL = "http://localhost:4200"
+
 
 def send_verification_email(user, request):
     """
@@ -14,7 +16,7 @@ def send_verification_email(user, request):
         user.save(update_fields=["email_verification_token"])
 
     token = user.email_verification_token
-    frontend_reset_link = f"http://localhost:4200/verify?token={str(token)}"
+    frontend_reset_link = f"{BASE_URL}/verify?token={str(token)}"
 
     context = {
         "username": user.username,
@@ -49,7 +51,7 @@ def send_password_reset_email(user, request):
     user.save(update_fields=["password_reset_token", "password_reset_token_created_at"])
 
     token = user.password_reset_token
-    frontend_reset_link = f"http://localhost:4200/password/reset?reset=true&token={str(token)}"
+    frontend_reset_link = f"{BASE_URL}/password/reset?reset=true&token={str(token)}"
 
     context = {
         "url": frontend_reset_link,

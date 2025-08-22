@@ -1,10 +1,17 @@
+import uuid
+from datetime import timedelta
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils import timezone
+from django.utils.translation import get_language_from_request
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
 from app_users.api.serializers import (
     RegisterSerializer,
     CustomUserSerializer,
@@ -15,10 +22,7 @@ from app_users.api.serializers import (
 )
 from app_users.models import UserProfiles
 from app_users.utils import send_verification_email, send_password_reset_email
-import uuid
-from django.utils import timezone
-from datetime import timedelta
-from django.conf import settings
+from app_videos.models import VideoFile, VideoProgress
 
 CustomUserModel = get_user_model()
 
@@ -57,12 +61,21 @@ class EmailVerifyView(APIView):
         user.save()
 
         if not UserProfiles.objects.filter(user=user).exists():
-            UserProfiles.objects.create(user=user, profile_name=user.username)
+            browser_language = get_language_from_request(request)
+            preferred_language = self.map_browser_to_video_language(browser_language)
+
+            UserProfiles.objects.create(user=user, profile_name=user.username, preferred_language=preferred_language)
 
         return Response(
             {"message": "Email successfully verified. You can now login."},
             status=status.HTTP_200_OK,
         )
+
+    def map_browser_to_video_language(self, browser_lang):
+        """Map browser language to VideoFile language choices"""
+        lang_code = browser_lang.split("-")[0].lower() if browser_lang else "en"
+        language_mapping = {"de": "de", "en": "en", "fr": "fr", "es": "es", "it": "it"}
+        return language_mapping.get(lang_code, "en")
 
 
 class UserDetailView(generics.RetrieveUpdateAPIView):
@@ -102,16 +115,20 @@ class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class LogoutView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
+    authentication_classes = []
 
     def post(self, request):
-        try:
-            refresh_token = request.data["refresh_token"]
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-            return Response(status=status.HTTP_205_RESET_CONTENT)
-        except Exception:
-            return Response({"detail": "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)
+        refresh_token = request.data.get("refresh_token")
+
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            except TokenError:
+                pass
+
+        return Response({"message": "Successfully logged out"}, status=status.HTTP_200_OK)
 
 
 class PasswordResetRequestView(generics.GenericAPIView):
@@ -170,3 +187,48 @@ class PasswordResetConfirmView(generics.GenericAPIView):
         user.save()
 
         return Response({"message": "Password has been reset successfully."}, status=status.HTTP_200_OK)
+
+
+class VideoProgressUpdateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, profile_id, video_file_id):
+        """Update video progress for a specific profile"""
+        profile = get_object_or_404(UserProfiles, id=profile_id, user=request.user)
+        video_file = get_object_or_404(VideoFile, id=video_file_id)
+        current_time = request.data.get("current_time")
+
+        if current_time is None:
+            raise ValidationError({"current_time": "This field is required."})
+
+        try:
+            current_time = float(current_time)
+        except (ValueError, TypeError):
+            raise ValidationError({"current_time": "Must be a valid number."})
+
+        if current_time < 0:
+            raise ValidationError({"current_time": "Cannot be negative."})
+
+        progress, created = VideoProgress.objects.get_or_create(
+            profile=profile, video_file=video_file, defaults={"current_time": current_time}
+        )
+
+        progress.current_time = current_time
+        progress.save()
+
+        serializer = UserProfileSerializer(profile, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, profile_id, video_file_id):
+        """Delete video progress for a specific profile"""
+        profile = get_object_or_404(UserProfiles, id=profile_id, user=request.user)
+
+        try:
+            progress = VideoProgress.objects.get(profile=profile, video_file_id=video_file_id)
+            progress.delete()
+
+            serializer = UserProfileSerializer(profile, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except VideoProgress.DoesNotExist:
+            raise ValidationError({"detail": "No progress found for this video."})

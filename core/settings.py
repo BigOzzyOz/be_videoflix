@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "import_export",
     "django_rq",
+    "django_filters",
     "drf_yasg",
     "app_users",
     "app_videos",
@@ -90,6 +91,11 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "EXCEPTION_HANDLER": "core.utils.exception_handler.custom_exception_handler",
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ),
 }
 
 # Simple JWT settings
@@ -132,7 +138,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Berlin"
 USE_I18N = True
 USE_TZ = True
 
@@ -173,9 +179,15 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
 # RQ settings
 RQ_QUEUES = {
     "default": {
-        "HOST": env("RQ_HOST", default="localhost"),
-        "PORT": env("RQ_PORT", default=6379),
-        "DB": env("RQ_DB", default=0),
+        "URL": env("RQ_URL", default="redis://localhost:6379/0"),
         "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=360),
-    }
+    },
+    "low": {
+        "URL": env("RQ_URL", default="redis://localhost:6379/0"),
+        "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=21600),  # 6 hours
+    },
+    "high": {
+        "URL": env("RQ_URL", default="redis://localhost:6379/0"),
+        "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=21600),  # 6 hours
+    },
 }

@@ -9,6 +9,7 @@ from app_users.api.views import (
     LogoutView,
     PasswordResetRequestView,
     PasswordResetConfirmView,
+    VideoProgressUpdateView,
 )
 
 urlpatterns = [
@@ -21,4 +22,9 @@ urlpatterns = [
     path("me/", UserDetailView.as_view(), name="user_detail"),
     path("me/profiles/", UserProfileListCreateView.as_view(), name="user_profile_list_create"),
     path("me/profiles/<uuid:profile_id>/", UserProfileDetailView.as_view(), name="user_profile_detail"),
+    path(
+        "me/profiles/<uuid:profile_id>/progress/<uuid:video_file_id>/update/",
+        VideoProgressUpdateView.as_view(),
+        name="update_video_progress",
+    ),
 ]
