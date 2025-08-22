@@ -124,11 +124,14 @@ class VideoProgress(models.Model):
             self.is_completed = self.progress_percentage >= 90
             self.is_started = self.current_time > 5
 
-            if self.is_completed and not was_completed:
-                self.completion_count += 1
+            if self.is_completed:
+                self.current_time = 0
+                self.progress_percentage = 0.0
+                if not was_completed:
+                    self.completion_count += 1
+                    self.last_completed = timezone.now()
+                    self.total_watch_time += self.video_file.duration
                 self.is_started = False
-                self.last_completed = timezone.now()
-                self.total_watch_time += self.video_file.duration
             elif not self.is_completed and was_completed:
                 pass
 
