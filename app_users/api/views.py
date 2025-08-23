@@ -97,6 +97,8 @@ class UserProfileListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         if UserProfiles.objects.filter(user=self.request.user).count() >= 4:
             raise ValidationError({"detail": "You can only have a maximum of 4 profiles."})
+        if not serializer.validated_data.get("profile_name"):
+            raise ValidationError({"profile_name": ["This field is required."]})
         serializer.save(user=self.request.user)
 
 

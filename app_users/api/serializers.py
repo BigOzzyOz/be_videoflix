@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from django.db.models import Sum
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from app_users.models import UserProfiles
 import uuid
@@ -18,12 +19,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "id",
             "profile_name",
             "preferred_language",
+            "is_kid",
             "video_progress",
             "watch_statistics",
         ]
 
     def get_video_progress(self, obj):
         """All video progress with status"""
+        if not isinstance(obj, UserProfiles):
+            return []
         progress_qs = obj.video_progress.select_related("video_file__video").order_by("-last_watched")
 
         return [
@@ -52,8 +56,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def get_watch_statistics(self, obj):
         """Watch statistics from video progress"""
-        from django.db.models import Sum
-
+        if not isinstance(obj, UserProfiles):
+            return []
         progress_qs = obj.video_progress.all()
         started_time = progress_qs.filter(is_started=True).aggregate(total=Sum("current_time"))["total"] or 0
         completed_time = progress_qs.aggregate(total=Sum("total_watch_time"))["total"] or 0
