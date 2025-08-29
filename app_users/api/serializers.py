@@ -12,6 +12,7 @@ CustomUserModel = get_user_model()
 class UserProfileSerializer(serializers.ModelSerializer):
     video_progress = serializers.SerializerMethodField()
     watch_statistics = serializers.SerializerMethodField()
+    profile_picture_url = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = UserProfiles
@@ -19,10 +20,21 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "id",
             "profile_name",
             "preferred_language",
+            "profile_picture",
+            "profile_picture_url",
             "is_kid",
             "video_progress",
             "watch_statistics",
         ]
+
+    def get_profile_picture_url(self, obj):
+        if obj.profile_picture:
+            request = self.context.get("request")
+            if request:
+                return request.build_absolute_uri(obj.profile_picture.url)
+            else:
+                return obj.profile_picture.url
+        return None
 
     def get_video_progress(self, obj):
         """All video progress with status"""
@@ -163,12 +175,14 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
 
+        context = self.context if hasattr(self, "context") else {}
+
         data["user"] = {
             "id": self.user.id,
             "username": self.user.username,
             "email": self.user.email,
             "role": self.user.role,
-            "profiles": UserProfileSerializer(self.user.profiles.all(), many=True).data,
+            "profiles": UserProfileSerializer(self.user.profiles.all(), many=True, context=context).data,
             "first_name": self.user.first_name,
             "last_name": self.user.last_name,
         }
