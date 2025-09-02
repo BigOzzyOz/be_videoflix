@@ -15,13 +15,14 @@ from .tasks import (
 
 @receiver(post_save, sender=VideoFile)
 def video_file_post_save(sender, instance, created, **kwargs):
+    """Signal: enqueue file processing when new VideoFile is created."""
     if created and instance.original_file and not instance.is_ready:
         queue = get_queue("default", default_timeout=21600)
         queue.enqueue(check_file_and_start_processing, instance.id)
 
 
 def check_file_and_start_processing(video_file_id, retry_count=0):
-    """Checks if the video file is ready and starts processing if it is."""
+    """Check if file is ready and start processing or retry."""
     try:
         video_file = VideoFile.objects.get(id=video_file_id)
     except VideoFile.DoesNotExist:
@@ -43,14 +44,14 @@ def check_file_and_start_processing(video_file_id, retry_count=0):
 
 
 def _restart_file_check(video_file_id, retry_count):
-    """Enqueue a retry for checking the file readiness."""
+    """Enqueue a delayed retry for file readiness."""
     queue = get_queue("default", default_timeout=21600)
     delay = min(30 + (retry_count * 30), 360)
     queue.enqueue_in(timedelta(seconds=delay), check_file_and_start_processing, video_file_id, retry_count + 1)
 
 
 def _is_file_ready(file_field):
-    """Checks if the file is ready for processing."""
+    """Return True if file exists, is readable, and stable."""
     try:
         if not file_field or not file_field.name:
             return False
@@ -58,25 +59,25 @@ def _is_file_ready(file_field):
         file_path = file_field.path
 
         if not os.path.exists(file_path):
-            return False  # if file does not exist
+            return False
 
         if not os.access(file_path, os.R_OK):
-            return False  # if file is not readable
+            return False
 
         file_size = os.path.getsize(file_path)
         if file_size == 0:
-            return False  # if file is empty
+            return False
 
         time.sleep(1)
         new_file_size = os.path.getsize(file_path)
         if new_file_size != file_size:
-            return False  # if file size changed during the check
+            return False
 
         try:
             with open(file_path, "rb") as f:
-                f.read(1024)  # if we can read the first 1KB of the file
+                f.read(1024)
         except IOError:
-            return False  # if file is not readable
+            return False
 
         return True
 
@@ -86,13 +87,10 @@ def _is_file_ready(file_field):
 
 
 def _enqueue_video_processing_jobs(instance):
-    """Enqueues jobs for processing the video file."""
+    """Enqueue all video processing jobs for a file."""
     queue = get_queue("default", default_timeout=21600)
-
     queue.enqueue(generate_thumbnail_and_duration, instance.id)
     queue.enqueue(generate_video_preview, instance.id)
-
     for res in ["480p", "720p", "1080p"]:
         queue.enqueue(generate_hls_for_resolution, instance.id, res)
-
     queue.enqueue(generate_master_playlist_waiting, instance.id)

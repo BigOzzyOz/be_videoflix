@@ -14,11 +14,11 @@ HLS_RESOLUTIONS = {
 
 
 class VideoFileHandler:
-    """Helper class for VideoFile operations"""
+    """VideoFile DB access helper."""
 
     @staticmethod
     def get_video_file(video_file_id):
-        """Gets VideoFile or returns None"""
+        """Return VideoFile by id or None."""
         try:
             return VideoFile.objects.get(id=video_file_id)
         except VideoFile.DoesNotExist:
@@ -27,11 +27,11 @@ class VideoFileHandler:
 
 
 class FFmpegCommandBuilder:
-    """Creates FFmpeg commands"""
+    """Builds FFmpeg/FFprobe commands."""
 
     @staticmethod
     def build_hls_command(input_path, output_dir, resolution_label, settings_dict):
-        """Creates FFmpeg command for HLS generation"""
+        """FFmpeg command for HLS."""
         output_file = os.path.join(output_dir, f"{resolution_label}.m3u8")
         scale_filter = f"scale={settings_dict['res']}"
         bitrate = settings_dict["bitrate"]
@@ -78,7 +78,7 @@ class FFmpegCommandBuilder:
 
     @staticmethod
     def build_preview_command(input_path, output_path):
-        """Creates FFmpeg command for video preview"""
+        """FFmpeg command for preview."""
         return [
             "ffmpeg",
             "-i",
@@ -101,12 +101,12 @@ class FFmpegCommandBuilder:
 
     @staticmethod
     def build_thumbnail_command(input_path, output_path):
-        """Creates FFmpeg command for thumbnail generation"""
+        """FFmpeg command for thumbnail."""
         return ["ffmpeg", "-y", "-ss", "00:00:10.000", "-i", input_path, "-vframes", "1", output_path]
 
     @staticmethod
     def build_duration_command(input_path):
-        """Creates FFprobe command for video duration"""
+        """FFprobe command for duration."""
         return [
             "ffprobe",
             "-v",
@@ -120,29 +120,29 @@ class FFmpegCommandBuilder:
 
 
 class DirectoryManager:
-    """Manages directories for video files"""
+    """Creates output directories."""
 
     @staticmethod
     def create_hls_directory(video_slug, language):
-        """Creates HLS directory"""
+        """Create HLS output dir."""
         output_dir = os.path.join(settings.MEDIA_ROOT, "hls", video_slug, language)
         os.makedirs(output_dir, exist_ok=True)
         return output_dir
 
     @staticmethod
     def create_preview_directory(video_slug, language):
-        """Creates preview directory"""
+        """Create preview output dir."""
         output_dir = os.path.join(settings.MEDIA_ROOT, "previews", video_slug, language)
         os.makedirs(output_dir, exist_ok=True)
         return output_dir
 
 
 class FFmpegExecutor:
-    """Executes FFmpeg commands"""
+    """Runs FFmpeg/FFprobe commands."""
 
     @staticmethod
     def execute_command(command, error_message):
-        """Executes FFmpeg command and handles errors"""
+        """Run FFmpeg command, handle errors."""
         try:
             subprocess.run(command, check=True, stderr=subprocess.PIPE)
             return True
@@ -152,7 +152,7 @@ class FFmpegExecutor:
 
     @staticmethod
     def execute_with_output(command, error_message):
-        """Executes command and returns output"""
+        """Run command, return output."""
         try:
             result = subprocess.run(command, capture_output=True, text=True, check=True)
             return result.stdout.strip()
@@ -162,11 +162,11 @@ class FFmpegExecutor:
 
 
 class PlaylistGenerator:
-    """Generates HLS playlists"""
+    """Creates/checks HLS playlists."""
 
     @staticmethod
     def create_master_playlist(output_dir):
-        """Creates master playlist"""
+        """Create master playlist file."""
         master_path = os.path.join(output_dir, "master.m3u8")
         try:
             with open(master_path, "w") as f:
@@ -184,14 +184,14 @@ class PlaylistGenerator:
 
     @staticmethod
     def check_playlist_files(output_dir):
-        """Checks if all playlist files exist"""
+        """Check all playlist files exist."""
         expected_files = ["480p.m3u8", "720p.m3u8", "1080p.m3u8"]
         return all(os.path.exists(os.path.join(output_dir, f)) for f in expected_files)
 
 
 # Refactored Tasks
 def generate_hls_for_resolution(video_file_id, resolution_label):
-    """Generates HLS for a specific resolution"""
+    """Generate HLS for one resolution."""
     video_file = VideoFileHandler.get_video_file(video_file_id)
     if not video_file:
         return
@@ -213,7 +213,7 @@ def generate_hls_for_resolution(video_file_id, resolution_label):
 
 
 def generate_master_playlist(video_file_id):
-    """Generates master playlist"""
+    """Generate master playlist for video."""
     video_file = VideoFileHandler.get_video_file(video_file_id)
     if not video_file:
         return
@@ -229,7 +229,7 @@ def generate_master_playlist(video_file_id):
 
 
 def generate_master_playlist_waiting(video_file_id, retries=60, interval=30):
-    """Waits for all playlists and generates master playlist"""
+    """Wait for playlists, then master playlist."""
     video_file = VideoFileHandler.get_video_file(video_file_id)
     if not video_file:
         return
@@ -246,7 +246,7 @@ def generate_master_playlist_waiting(video_file_id, retries=60, interval=30):
 
 
 def generate_video_preview(video_file_id):
-    """Generates video preview"""
+    """Generate video preview file."""
     video_file = VideoFileHandler.get_video_file(video_file_id)
     if not video_file:
         return
@@ -265,7 +265,7 @@ def generate_video_preview(video_file_id):
 
 
 def generate_thumbnail_and_duration(video_file_id):
-    """Generates thumbnail and duration for a video file"""
+    """Generate thumbnail and duration."""
     video_file = VideoFileHandler.get_video_file(video_file_id)
     if not video_file:
         return
@@ -276,7 +276,7 @@ def generate_thumbnail_and_duration(video_file_id):
 
 
 def _generate_thumbnail(video_file):
-    """Private function: generates a thumbnail for the video file"""
+    """Generate thumbnail for video file."""
     video_path = video_file.original_file.path
 
     try:
@@ -285,14 +285,15 @@ def _generate_thumbnail(video_file):
 
             if FFmpegExecutor.execute_command(command, "Error generating thumbnail"):
                 with open(temp_thumb.name, "rb") as f:
-                    video_file.thumbnail.save(f"{video_file.pk}_thumb.jpg", ContentFile(f.read()), save=False)
+                    data = f.read()
+                video_file.thumbnail.save(f"{video_file.pk}_thumb.jpg", ContentFile(data), save=False)
             os.remove(temp_thumb.name)
     except Exception as e:
         print(f"Error in thumbnail process: {e}")
 
 
 def _get_video_duration(video_file):
-    """Private function: calculates video duration"""
+    """Calculate video duration."""
     video_path = video_file.original_file.path
     command = FFmpegCommandBuilder.build_duration_command(video_path)
 
