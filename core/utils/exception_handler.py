@@ -15,6 +15,11 @@ from rest_framework_simplejwt.exceptions import TokenError
 
 
 def custom_exception_handler(exc, context):
+    """
+    Custom exception handler for DRF views.
+    Returns a Response with appropriate status and message for known exceptions.
+    Falls back to 500 for unhandled exceptions.
+    """
     response = exception_handler(exc, context)
 
     if response is not None:
