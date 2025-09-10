@@ -15,6 +15,11 @@ from rest_framework_simplejwt.exceptions import TokenError
 
 
 def custom_exception_handler(exc, context):
+    """
+    Custom exception handler for DRF views.
+    Returns a Response with appropriate status and message for known exceptions.
+    Falls back to 500 for unhandled exceptions.
+    """
     response = exception_handler(exc, context)
 
     if response is not None:
@@ -35,7 +40,7 @@ def custom_exception_handler(exc, context):
     if isinstance(exc, MethodNotAllowed):
         return Response({"detail": str(exc)}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    (print(f"Unhandled exception: {exc}, {context}"),)
+    print(f"Unhandled exception: {exc}, {context}")
     return Response(
         {"detail": "Internal server error. "},
         status=status.HTTP_500_INTERNAL_SERVER_ERROR,

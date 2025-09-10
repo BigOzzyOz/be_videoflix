@@ -1,13 +1,21 @@
 from django_filters import rest_framework as filters
 from django.utils import timezone
 from app_videos.models import VideoFile
+from django.db.models import Max
 
 
 class CharInFilter(filters.BaseInFilter, filters.CharFilter):
+    """Custom filter for filtering by multiple character values (e.g., languages)."""
+
     pass
 
 
 class VideoFileFilter(filters.FilterSet):
+    """
+    FilterSet for VideoFile API endpoints.
+    Supports filtering by title, genres, published status, language, readiness, and newly released videos.
+    """
+
     title = filters.CharFilter(field_name="video__title", lookup_expr="icontains")
     genres = filters.CharFilter(field_name="video__genres__name", lookup_expr="iexact")
     published = filters.BooleanFilter(field_name="video__is_published")
@@ -20,5 +28,15 @@ class VideoFileFilter(filters.FilterSet):
         fields = ["title", "genres", "published", "newly_released", "language", "is_ready"]
 
     def filter_newly_released(self, queryset, name, value):
+        """
+        Filter for newly released videos:
+        - If value is True: return videos released in the last 90 days.
+        - If value is False: return only the most recently released video(s).
+        - If no videos exist: return an empty queryset.
+        """
         if value:
             return queryset.filter(video__release_date__gte=timezone.now() - timezone.timedelta(days=90))
+        latest_date = queryset.aggregate(latest=Max("video__release_date"))["latest"]
+        if latest_date:
+            return queryset.filter(video__release_date=latest_date)
+        return queryset.none()

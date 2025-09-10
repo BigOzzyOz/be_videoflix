@@ -194,9 +194,21 @@ class PasswordResetConfirmViewTests(APITestCase):
         data_missing_confirm = {"token": str(self.reset_token), "new_password": self.new_password}
         response = self.client.post(url, data_missing_confirm, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("new_password2", response.data)  # Changed from confirm_new_password
+        self.assertIn("new_password2", response.data)
 
         data_missing_token = {"new_password": self.new_password, "new_password2": self.new_password}
         response = self.client.post(url, data_missing_token, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("token", response.data)
+
+    def test_password_reset_confirm_token_not_string(self):
+        url = reverse(self.url_name_generic)
+        data = {
+            "token": 123456,
+            "new_password": self.new_password,
+            "new_password2": self.new_password,
+        }
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("token", response.data)
+        self.assertIn("Invalid token format.", str(response.data["token"]))

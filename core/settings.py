@@ -6,7 +6,7 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(DEBUG=(bool, True))
 
-# Load .env file (automatisch: .env, .env.development, .env.production, falls vorhanden)
+# Load .env file
 environ.Env.read_env(env_file=env.str("DJANGO_ENV_FILE", default=str(BASE_DIR / ".env")))
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -18,14 +18,16 @@ DEBUG = env("DEBUG", default=True)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
 
-INTERNAL_IPS = env.list("INTERNAL_IPS", default=["127.0.0.1"])  # localhost
+INTERNAL_IPS = env.list("INTERNAL_IPS", default=["127.0.0.1"])
 
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
-    default=["http://localhost:4200"],  # Angular
+    default=["http://localhost:4200"],
 )
 
 CORS_ALLOW_CREDENTIALS = env.bool("CORS_ALLOW_CREDENTIALS", default=True)
+
+BASE_URL = env("BASE_URL", default="http://localhost:4200")
 
 # Application definition
 INSTALLED_APPS = [
@@ -37,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
-    "rest_framework_simplejwt.token_blacklist",  # Hinzugefügt
+    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "debug_toolbar",
     "import_export",
@@ -106,7 +108,7 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
     "ALGORITHM": "HS256",
-    "SIGNING_KEY": SECRET_KEY,  # Wiederverwendung des Django SECRET_KEY
+    "SIGNING_KEY": SECRET_KEY,
     "VERIFYING_KEY": None,
     "AUDIENCE": None,
     "ISSUER": None,

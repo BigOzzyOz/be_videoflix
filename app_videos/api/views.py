@@ -8,6 +8,8 @@ from .pagination import VideoPagination
 
 
 class VideoFileListView(generics.ListAPIView):
+    """List published and ready video files."""
+
     queryset = VideoFile.objects.published_and_ready()
     serializer_class = VideoFileSerializer
     filterset_class = VideoFileFilter
@@ -15,11 +17,15 @@ class VideoFileListView(generics.ListAPIView):
 
 
 class VideoFileDetailView(generics.RetrieveAPIView):
+    """Retrieve a single published and ready video file."""
+
     queryset = VideoFile.objects.published_and_ready()
     serializer_class = VideoFileSerializer
 
 
 class GenreVideoCountView(generics.GenericAPIView):
+    """Return video count for each genre."""
+
     def get(self, request):
         queryset = Genres.objects.annotate(video_count=Count("videos"))
         data = {genres.name.lower(): genres.video_count for genres in queryset}

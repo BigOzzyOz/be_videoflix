@@ -86,7 +86,7 @@ class UserProfileViewsTests(APITestCase):
         response = self.client.post(self.list_create_url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("profile_name", response.data)
-        self.assertEqual(response.data["profile_name"][0].code, "required")
+        self.assertEqual(response.data["profile_name"], ["This field is required."])
 
     def _get_detail_url(self, profile_id):
         return reverse("user_profile_detail", kwargs={"profile_id": profile_id})

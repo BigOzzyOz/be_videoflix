@@ -6,6 +6,8 @@ from app_videos.models import VideoProgress
 
 
 class VideoProgressInline(admin.TabularInline):
+    """Inline for VideoProgress in admin."""
+
     model = VideoProgress
     extra = 0
     readonly_fields = ("progress_percentage", "is_completed", "is_started", "last_watched")
@@ -14,6 +16,8 @@ class VideoProgressInline(admin.TabularInline):
 
 
 class UserProfileInline(admin.TabularInline):
+    """Inline for UserProfiles in admin."""
+
     model = UserProfiles
     extra = 0
     max_num = 4
@@ -23,6 +27,8 @@ class UserProfileInline(admin.TabularInline):
 
 @admin.register(CustomUserModel)
 class CustomUserAdmin(UserAdmin):
+    """Admin for CustomUserModel with profile overview."""
+
     model = CustomUserModel
     list_display = ("username", "email", "role", "created_at", "last_login", "display_profiles", "profile_count")
     list_filter = ("role", "is_staff", "is_active", "created_at")
@@ -41,6 +47,7 @@ class CustomUserAdmin(UserAdmin):
     readonly_fields = ("created_at", "updated_at", "date_joined", "email_verification_token")
 
     def display_profiles(self, obj):
+        """Shows up to 4 profiles as a string."""
         profiles = obj.profiles.all()[:4]
         profile_list = []
         for p in profiles:
@@ -51,6 +58,7 @@ class CustomUserAdmin(UserAdmin):
         return ", ".join(profile_list)
 
     def profile_count(self, obj):
+        """Returns the number of profiles."""
         count = obj.profiles.count()
         return f"{count}/4"
 
@@ -60,6 +68,8 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(UserProfiles)
 class UserProfileAdmin(admin.ModelAdmin):
+    """Admin for UserProfiles with video progress and watch time."""
+
     list_display = (
         "profile_name",
         "user",
@@ -76,13 +86,13 @@ class UserProfileAdmin(admin.ModelAdmin):
     fieldsets = (("Profile Info", {"fields": ("user", "profile_name", "is_kid", "preferred_language")}),)
 
     def video_progress_count(self, obj):
-        """Count of videos with progress"""
+        """Number of videos with progress."""
         started = obj.video_progress.filter(is_started=True).count()
         completed = obj.video_progress.filter(is_completed=True).count()
         return f"{started} started / {completed} completed"
 
     def watch_time_display(self, obj):
-        """Total watch time in hours and minutes"""
+        """Total watch time in hours and minutes."""
         total_seconds = sum(p.current_time for p in obj.video_progress.all())
         hours = int(total_seconds // 3600)
         minutes = int((total_seconds % 3600) // 60)
@@ -97,6 +107,8 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(VideoProgress)
 class VideoProgressAdmin(admin.ModelAdmin):
+    """Admin for VideoProgress with progress bar display."""
+
     list_display = (
         "profile",
         "video_title",
@@ -124,13 +136,15 @@ class VideoProgressAdmin(admin.ModelAdmin):
     )
 
     def video_title(self, obj):
+        """Returns the title of the video."""
         return obj.video_file.display_title
 
     def language(self, obj):
+        """Returns the language of the video."""
         return obj.video_file.language.upper()
 
     def progress_bar(self, obj):
-        """Visual progress bar"""
+        """Visual progress bar as HTML."""
         percentage = obj.progress_percentage
         color = "#28a745" if obj.is_completed else "#007bff"
         return format_html(
@@ -143,7 +157,7 @@ class VideoProgressAdmin(admin.ModelAdmin):
         )
 
     def current_time_display(self, obj):
-        """Format current time as MM:SS"""
+        """Formats the current time as MM:SS."""
         total_seconds = int(obj.current_time)
         minutes = total_seconds // 60
         seconds = total_seconds % 60

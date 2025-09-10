@@ -6,13 +6,18 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Genres(models.Model):
+    """Genre/category for videos."""
+
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
+        """String representation: genre name."""
         return self.name
 
 
 class Video(models.Model):
+    """Main video object."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name="Video ID")
     genres = models.ManyToManyField(Genres, related_name="videos", blank=True, verbose_name="Genres")
     title = models.CharField(max_length=255)
@@ -27,22 +32,29 @@ class Video(models.Model):
         ordering = ["-created_at"]
 
     def save(self, *args, **kwargs):
+        """Auto-generate slug from title if not set."""
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
 
     def __str__(self):
+        """String representation: video title."""
         return self.title
 
 
 class VideoFileManager(models.Manager):
+    """Custom queryset for video files."""
+
     def published_and_ready(self):
+        """Return only published and ready video files."""
         return self.filter(
             is_ready=True, video__is_published=True, video__release_date__lte=timezone.now()
         ).select_related("video")
 
 
 class VideoFile(models.Model):
+    """File and metadata for a video in a specific language."""
+
     LANGUAGE_CHOICES = (
         ("en", "English"),
         ("de", "Deutsch"),
@@ -72,6 +84,7 @@ class VideoFile(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
+        """String representation: video title and language."""
         return f"{self.video.title} – [{self.language}]"
 
     @property
@@ -86,6 +99,8 @@ class VideoFile(models.Model):
 
 
 class VideoProgress(models.Model):
+    """Tracks user progress for a video file."""
+
     profile = models.ForeignKey("app_users.UserProfiles", on_delete=models.CASCADE, related_name="video_progress")
     video_file = models.ForeignKey(VideoFile, on_delete=models.CASCADE, related_name="progress_entries")
 
@@ -114,6 +129,7 @@ class VideoProgress(models.Model):
         ordering = ["-last_watched"]
 
     def save(self, *args, **kwargs):
+        """Update progress, completion, and watch time on save."""
         if not self.first_watched and self.current_time > 0:
             self.first_watched = timezone.now()
 
@@ -139,7 +155,7 @@ class VideoProgress(models.Model):
 
     @property
     def status(self):
-        """Returns the current status of the video"""
+        """Returns the current status of the video progress."""
         if self.is_completed:
             return "completed"
         elif self.is_started and self.progress_percentage >= 5:
@@ -150,4 +166,5 @@ class VideoProgress(models.Model):
             return "not_started"
 
     def __str__(self):
+        """String representation: profile, title, percent."""
         return f"{self.profile.profile_name} - {self.video_file.display_title} ({self.progress_percentage:.1f}%)"

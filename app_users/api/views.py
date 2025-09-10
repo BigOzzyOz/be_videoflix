@@ -7,6 +7,7 @@ from django.utils.translation import get_language_from_request
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
@@ -28,21 +29,28 @@ CustomUserModel = get_user_model()
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
+    """JWT login view."""
+
     serializer_class = MyTokenObtainPairSerializer
     permission_classes = (permissions.AllowAny,)
 
 
 class RegisterView(generics.CreateAPIView):
+    """User registration view."""
+
     queryset = CustomUserModel.objects.all()
     permission_classes = (permissions.AllowAny,)
     serializer_class = RegisterSerializer
 
     def perform_create(self, serializer):
+        """Sends verification email after user creation."""
         user = serializer.save()
         send_verification_email(user, self.request)
 
 
 class EmailVerifyView(APIView):
+    """Verifies user email via token."""
+
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, token):
@@ -72,42 +80,57 @@ class EmailVerifyView(APIView):
         )
 
     def map_browser_to_video_language(self, browser_lang):
-        """Map browser language to VideoFile language choices"""
+        """Maps browser language to video language code."""
         lang_code = browser_lang.split("-")[0].lower() if browser_lang else "en"
         language_mapping = {"de": "de", "en": "en", "fr": "fr", "es": "es", "it": "it"}
         return language_mapping.get(lang_code, "en")
 
 
 class UserDetailView(generics.RetrieveUpdateAPIView):
+    """Get or update own user details."""
+
     queryset = CustomUserModel.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_object(self):
+        """Returns current user object."""
         return self.request.user
 
 
 class UserProfileListCreateView(generics.ListCreateAPIView):
+    """List or create user profiles."""
+
     serializer_class = UserProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
+        """Returns profiles for current user."""
         return UserProfiles.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
+        """Validates profile count and name, then creates profile."""
         if UserProfiles.objects.filter(user=self.request.user).count() >= 4:
             raise ValidationError({"detail": "You can only have a maximum of 4 profiles."})
+        if not serializer.validated_data.get("profile_name"):
+            raise ValidationError({"profile_name": ["This field is required."]})
         serializer.save(user=self.request.user)
 
 
 class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """Retrieve, update or delete a user profile."""
+
     serializer_class = UserProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
+        """Returns profiles for current user."""
         return UserProfiles.objects.filter(user=self.request.user)
 
     def get_object(self):
+        """Returns profile object by id."""
         queryset = self.get_queryset()
         obj = generics.get_object_or_404(queryset, pk=self.kwargs["profile_id"])
         self.check_object_permissions(self.request, obj)
@@ -115,10 +138,13 @@ class UserProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class LogoutView(APIView):
+    """JWT logout view (blacklists refresh token)."""
+
     permission_classes = (permissions.AllowAny,)
     authentication_classes = []
 
     def post(self, request):
+        """Blacklists refresh token if provided."""
         refresh_token = request.data.get("refresh_token")
 
         if refresh_token:
@@ -132,10 +158,13 @@ class LogoutView(APIView):
 
 
 class PasswordResetRequestView(generics.GenericAPIView):
+    """Request password reset by email."""
+
     serializer_class = PasswordResetRequestSerializer
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, *args, **kwargs):
+        """Sends password reset email if user exists."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"]
@@ -156,10 +185,13 @@ class PasswordResetRequestView(generics.GenericAPIView):
 
 
 class PasswordResetConfirmView(generics.GenericAPIView):
+    """Confirm password reset with token and new password."""
+
     serializer_class = PasswordResetConfirmSerializer
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, *args, **kwargs):
+        """Validates token, resets password if valid."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -167,8 +199,6 @@ class PasswordResetConfirmView(generics.GenericAPIView):
         new_password = serializer.validated_data["new_password"]
 
         try:
-            if not isinstance(token_uuid_str, str):
-                raise ValueError("Token must be a string.")
             token_uuid = uuid.UUID(token_uuid_str)
             user = CustomUserModel.objects.get(password_reset_token=token_uuid)
         except (ValueError, CustomUserModel.DoesNotExist, TypeError):
@@ -190,10 +220,12 @@ class PasswordResetConfirmView(generics.GenericAPIView):
 
 
 class VideoProgressUpdateView(APIView):
+    """Update or delete video progress for a profile."""
+
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, profile_id, video_file_id):
-        """Update video progress for a specific profile"""
+        """Updates video progress for a profile and video file."""
         profile = get_object_or_404(UserProfiles, id=profile_id, user=request.user)
         video_file = get_object_or_404(VideoFile, id=video_file_id)
         current_time = request.data.get("current_time")
@@ -220,7 +252,7 @@ class VideoProgressUpdateView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, profile_id, video_file_id):
-        """Delete video progress for a specific profile"""
+        """Deletes video progress for a profile and video file."""
         profile = get_object_or_404(UserProfiles, id=profile_id, user=request.user)
 
         try:
