@@ -2,7 +2,7 @@ services:
   rqscheduler:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     command: python manage.py rqscheduler
     environment:
       ENV: production
