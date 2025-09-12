@@ -154,9 +154,7 @@ FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME", default="/")
 
 STATIC_URL = env("STATIC_URL", default="/static/")
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+STATICFILES_DIRS = []
 
 STATIC_ROOT = env("STATIC_ROOT", default=BASE_DIR / "staticfiles")
 
