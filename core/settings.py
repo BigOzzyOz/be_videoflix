@@ -150,7 +150,7 @@ PASSWORD_RESET_TIMEOUT_HOURS = 24
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-FORCED_SCRIPT_NAME = env("FORCED_SCRIPT_NAME", default="/")
+FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME", default="/")
 
 STATIC_URL = env("STATIC_URL", default="/static/")
 
