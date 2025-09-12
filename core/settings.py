@@ -176,6 +176,9 @@ EMAIL_USE_SSL = env("EMAIL_USE_SSL", default="False") == "True"
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
 
 
+# CSRF Trusted Origins
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+
 # RQ settings
 RQ_QUEUES = {
     "default": {
