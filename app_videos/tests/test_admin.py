@@ -65,6 +65,18 @@ class VideoAdminTest(TestCase):
 
 
 class VideoFileAdminTest(TestCase):
+    def test_duration_display_format(self):
+        self.vf.duration = 8436.76  # 2h 20m 36s
+        self.vf.save()
+        result = self.admin.duration_display(self.vf)
+        self.assertEqual(result, "02:20:36")
+
+    def test_duration_display_none(self):
+        self.vf.duration = 0
+        self.vf.save()
+        result = self.admin.duration_display(self.vf)
+        self.assertEqual(result, "-")
+
     def test_status_display_uploading_started_registry(self):
         self.vf.is_ready = False
         self.vf.save()
@@ -224,6 +236,18 @@ class GenreAdminTest(TestCase):
 
 
 class VideoFileInlineTest(TestCase):
+    def test_duration_display_format(self):
+        self.vf.duration = 8436.76  # 2h 20m 36s
+        self.vf.save()
+        result = self.inline.duration_display(self.vf)
+        self.assertEqual(result, "02:20:36")
+
+    def test_duration_display_none(self):
+        self.vf.duration = 0
+        self.vf.save()
+        result = self.inline.duration_display(self.vf)
+        self.assertEqual(result, "-")
+
     def test_status_display_pending_fallback(self):
         self.vf.is_ready = False
         self.vf.save()

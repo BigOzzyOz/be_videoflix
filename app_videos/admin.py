@@ -11,7 +11,7 @@ class VideoFileInline(admin.TabularInline):
     verbose_name = "Video File"
     verbose_name_plural = "Video Files"
     extra = 1
-    readonly_fields = ("thumbnail_preview", "duration", "status_display")
+    readonly_fields = ("thumbnail_preview", "duration_display", "status_display")
     fields = (
         "original_file",
         "language",
@@ -19,7 +19,7 @@ class VideoFileInline(admin.TabularInline):
         "localized_description",
         "status_display",
         "thumbnail_preview",
-        "duration",
+        "duration_display",
     )
 
     def status_display(self, obj):
@@ -34,6 +34,17 @@ class VideoFileInline(admin.TabularInline):
         return "-"
 
     thumbnail_preview.short_description = "Thumbnail"
+
+    def duration_display(self, obj):
+        """Display duration in HH:MM:SS format or '-' if not set."""
+        if obj.duration:
+            hours = int(obj.duration // 3600)
+            minutes = int((obj.duration % 3600) // 60)
+            seconds = int(obj.duration % 60)
+            return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        return "-"
+
+    duration_display.short_description = "Duration"
 
 
 @admin.register(Video)
@@ -100,11 +111,11 @@ class VideoFileAdmin(admin.ModelAdmin):
         "status_display",
         "created_at",
         "thumbnail_preview",
-        "duration",
+        "duration_display",
     )
     readonly_fields = (
         "thumbnail_preview",
-        "duration",
+        "duration_display",
         "display_title_admin",
         "display_description_admin",
         "status_display",
@@ -123,7 +134,16 @@ class VideoFileAdmin(admin.ModelAdmin):
         ("Video Reference", {"fields": ("video",)}),
         (
             "File Information",
-            {"fields": ("original_file", "language", "duration", "thumbnail", "thumbnail_preview", "preview_file")},
+            {
+                "fields": (
+                    "original_file",
+                    "language",
+                    "duration_display",
+                    "thumbnail",
+                    "thumbnail_preview",
+                    "preview_file",
+                )
+            },
         ),
         (
             "Localization",
@@ -157,6 +177,17 @@ class VideoFileAdmin(admin.ModelAdmin):
         if obj.localized_description:
             return f"🌐 {obj.localized_description[:100]}..."
         return f"📄 {obj.video.description[:100]}... (origin)"
+
+    def duration_display(self, obj):
+        """Display duration in HH:MM:SS format or '-' if not set."""
+        if obj.duration:
+            hours = int(obj.duration // 3600)
+            minutes = int((obj.duration % 3600) // 60)
+            seconds = int(obj.duration % 60)
+            return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        return "-"
+
+    duration_display.short_description = "Duration"
 
     thumbnail_preview.short_description = "Thumbnail"
     display_title_admin.short_description = "Effective Title"
