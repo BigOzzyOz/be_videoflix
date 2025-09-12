@@ -7,6 +7,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from PIL import Image
 import io
 from django.core.files.base import ContentFile
+from unittest.mock import patch, MagicMock
+from app_videos.utils import get_video_file_status
 
 
 class VideoAdminTest(TestCase):
@@ -63,6 +65,85 @@ class VideoAdminTest(TestCase):
 
 
 class VideoFileAdminTest(TestCase):
+    def test_status_display_uploading_started_registry(self):
+        self.vf.is_ready = False
+        self.vf.save()
+        from unittest.mock import patch, MagicMock
+        from app_videos.utils import get_video_file_status
+
+        with patch("django_rq.get_queue") as mock_get_queue:
+            mock_queue = MagicMock()
+            mock_queue.jobs = []
+            mock_queue.failed_job_registry.get_job_ids.return_value = []
+            mock_queue.started_job_registry.get_job_ids.return_value = ["jobid1"]
+            mock_job = MagicMock()
+            mock_job.args = [self.vf.id]
+            mock_queue.fetch_job.side_effect = lambda job_id: mock_job if job_id == "jobid1" else None
+            mock_get_queue.return_value = mock_queue
+            result = get_video_file_status(self.vf)
+            self.assertIn("uploading", str(result))
+
+    def test_status_display_pending_fallback(self):
+        self.vf.is_ready = False
+        self.vf.save()
+
+        with patch("django_rq.get_queue") as mock_get_queue:
+            mock_queue = MagicMock()
+            mock_queue.jobs = []
+            mock_queue.failed_job_registry.get_job_ids.return_value = []
+            mock_queue.started_job_registry.get_job_ids.return_value = []
+            mock_queue.fetch_job.return_value = None
+            mock_get_queue.return_value = mock_queue
+            result = get_video_file_status(self.vf)
+            self.assertIn("not started", str(result))
+
+    def test_status_display_done(self):
+        self.vf.is_ready = True
+        self.vf.save()
+        result = self.admin.status_display(self.vf)
+        self.assertIn("✅", str(result))
+
+    def test_status_display_error(self):
+        self.vf.is_ready = False
+        self.vf.save()
+
+        with patch("django_rq.get_queue") as mock_get_queue:
+            mock_queue = MagicMock()
+            mock_queue.failed_job_registry.get_job_ids.return_value = ["jobid1"]
+            mock_queue.fetch_job.return_value = MagicMock(args=[self.vf.id])
+            mock_queue.jobs = []
+            mock_get_queue.return_value = mock_queue
+            result = self.admin.status_display(self.vf)
+            self.assertIn("❌", str(result))
+
+    def test_status_display_uploading(self):
+        self.vf.is_ready = False
+        self.vf.save()
+
+        with patch("django_rq.get_queue") as mock_get_queue:
+            mock_queue = MagicMock()
+            job = MagicMock(args=[self.vf.id], is_started=True)
+            mock_queue.jobs = [job]
+            mock_queue.failed_job_registry.get_job_ids.return_value = []
+            mock_queue.fetch_job.return_value = None
+            mock_get_queue.return_value = mock_queue
+            result = self.admin.status_display(self.vf)
+            self.assertIn("⏳", str(result))
+
+    def test_status_display_pending(self):
+        self.vf.is_ready = False
+        self.vf.save()
+
+        with patch("django_rq.get_queue") as mock_get_queue:
+            mock_queue = MagicMock()
+            job = MagicMock(args=[self.vf.id], is_started=False)
+            mock_queue.jobs = [job]
+            mock_queue.failed_job_registry.get_job_ids.return_value = []
+            mock_queue.fetch_job.return_value = None
+            mock_get_queue.return_value = mock_queue
+            result = self.admin.status_display(self.vf)
+            self.assertIn("🕒", str(result))
+
     def setUp(self):
         self.admin = VideoFileAdmin(VideoFile, AdminSite())
         self.genre = Genres.objects.create(name="Action")
@@ -143,6 +224,67 @@ class GenreAdminTest(TestCase):
 
 
 class VideoFileInlineTest(TestCase):
+    def test_status_display_pending_fallback(self):
+        self.vf.is_ready = False
+        self.vf.save()
+
+        with patch("django_rq.get_queue") as mock_get_queue:
+            mock_queue = MagicMock()
+            mock_queue.jobs = []
+            mock_queue.failed_job_registry.get_job_ids.return_value = []
+            mock_queue.started_job_registry.get_job_ids.return_value = []
+            mock_queue.fetch_job.return_value = None
+            mock_get_queue.return_value = mock_queue
+            result = get_video_file_status(self.vf)
+            self.assertIn("not started", str(result))
+
+    def test_status_display_done(self):
+        self.vf.is_ready = True
+        self.vf.save()
+        result = self.inline.status_display(self.vf)
+        self.assertIn("✅", str(result))
+
+    def test_status_display_error(self):
+        self.vf.is_ready = False
+        self.vf.save()
+
+        with patch("django_rq.get_queue") as mock_get_queue:
+            mock_queue = MagicMock()
+            mock_queue.failed_job_registry.get_job_ids.return_value = ["jobid1"]
+            mock_queue.fetch_job.return_value = MagicMock(args=[self.vf.id])
+            mock_queue.jobs = []
+            mock_get_queue.return_value = mock_queue
+            result = self.inline.status_display(self.vf)
+            self.assertIn("❌", str(result))
+
+    def test_status_display_uploading(self):
+        self.vf.is_ready = False
+        self.vf.save()
+
+        with patch("django_rq.get_queue") as mock_get_queue:
+            mock_queue = MagicMock()
+            job = MagicMock(args=[self.vf.id], is_started=True)
+            mock_queue.jobs = [job]
+            mock_queue.failed_job_registry.get_job_ids.return_value = []
+            mock_queue.fetch_job.return_value = None
+            mock_get_queue.return_value = mock_queue
+            result = self.inline.status_display(self.vf)
+            self.assertIn("⏳", str(result))
+
+    def test_status_display_pending(self):
+        self.vf.is_ready = False
+        self.vf.save()
+
+        with patch("django_rq.get_queue") as mock_get_queue:
+            mock_queue = MagicMock()
+            job = MagicMock(args=[self.vf.id], is_started=False)
+            mock_queue.jobs = [job]
+            mock_queue.failed_job_registry.get_job_ids.return_value = []
+            mock_queue.fetch_job.return_value = None
+            mock_get_queue.return_value = mock_queue
+            result = self.inline.status_display(self.vf)
+            self.assertIn("🕒", str(result))
+
     def setUp(self):
         self.inline = VideoFileInline(VideoFile, AdminSite())
         self.genre = Genres.objects.create(name="Action")

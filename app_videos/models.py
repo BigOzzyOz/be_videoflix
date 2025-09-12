@@ -10,6 +10,10 @@ class Genres(models.Model):
 
     name = models.CharField(max_length=50, unique=True)
 
+    class Meta:
+        verbose_name = "Genres"
+        verbose_name_plural = "Genre"
+
     def __str__(self):
         """String representation: genre name."""
         return self.name
@@ -82,6 +86,8 @@ class VideoFile(models.Model):
     class Meta:
         unique_together = ("video", "language")
         ordering = ["-created_at"]
+        verbose_name = "Video File"
+        verbose_name_plural = "Video Files"
 
     def __str__(self):
         """String representation: video title and language."""
@@ -127,6 +133,8 @@ class VideoProgress(models.Model):
     class Meta:
         unique_together = ("profile", "video_file")
         ordering = ["-last_watched"]
+        verbose_name = "Video Progress"
+        verbose_name_plural = "Video Progress Entries"
 
     def save(self, *args, **kwargs):
         """Update progress, completion, and watch time on save."""
