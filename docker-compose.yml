@@ -40,7 +40,7 @@ services:
   rqworker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     command: python manage.py rqworker default low high --with-scheduler
     environment:
       ENV: development
