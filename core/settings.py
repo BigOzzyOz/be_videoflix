@@ -183,7 +183,7 @@ CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 RQ_QUEUES = {
     "default": {
         "URL": env("RQ_URL", default="redis://localhost:6379/0"),
-        "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=360),
+        "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=21600),
     },
     "low": {
         "URL": env("RQ_URL", default="redis://localhost:6379/0"),
