@@ -11,6 +11,7 @@ services:
     depends_on:
       - redis
       - db
+    restart: always
   db:
     image: postgres:15-alpine
     restart: always
@@ -34,7 +35,7 @@ services:
     build:
       context: .
       dockerfile: dockerfile
-    command: gunicorn core.wsgi:application --bind 0.0.0.0:8002 --workers 3
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8002 --workers 3 --timeout 900
     environment:
       ENV: production
       REDIS_URL: redis://redis:6379
@@ -47,6 +48,7 @@ services:
     volumes:
       - ./static:/app/static
       - ./media:/app/media
+    restart: always
 
   rqworker:
     build:
@@ -60,6 +62,7 @@ services:
     depends_on:
       - redis
       - db
+    restart: always
 
 volumes:
   postgres_data:
