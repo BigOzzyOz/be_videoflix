@@ -152,15 +152,18 @@ PASSWORD_RESET_TIMEOUT_HOURS = 24
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME", default="/")
 
+
 STATIC_URL = env("STATIC_URL", default="/static/")
-
-STATICFILES_DIRS = []
-
-STATIC_ROOT = env("STATIC_ROOT", default=BASE_DIR / "staticfiles")
-
 MEDIA_URL = env("MEDIA_URL", default="/media/")
 
-MEDIA_ROOT = env("MEDIA_ROOT", default=BASE_DIR / "media")
+if DEBUG:
+    STATICFILES_DIRS = [BASE_DIR / "static"]
+    STATIC_ROOT = BASE_DIR / "staticfiles"
+    MEDIA_ROOT = BASE_DIR / "media"
+else:
+    STATICFILES_DIRS = []
+    STATIC_ROOT = env("STATIC_ROOT", default=BASE_DIR / "staticfiles")
+    MEDIA_ROOT = env("MEDIA_ROOT", default=BASE_DIR / "media")
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
