@@ -150,21 +150,19 @@ PASSWORD_RESET_TIMEOUT_HOURS = 24
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME", default="/")
-
+FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME", default=None)
 
 STATIC_URL = env("STATIC_URL", default="/static/")
-MEDIA_URL = env("MEDIA_URL", default="/media/")
 
 if DEBUG:
     STATICFILES_DIRS = [BASE_DIR / "static"]
-    STATIC_ROOT = BASE_DIR / "staticfiles"
-    MEDIA_ROOT = BASE_DIR / "media"
 else:
     STATICFILES_DIRS = []
-    STATIC_ROOT = env("STATIC_ROOT", default=BASE_DIR / "staticfiles")
-    MEDIA_ROOT = env("MEDIA_ROOT", default=BASE_DIR / "media")
 
+STATIC_ROOT = env("STATIC_ROOT", default=BASE_DIR / "staticfiles")
+
+MEDIA_URL = env("MEDIA_URL", default="/media/")
+MEDIA_ROOT = env("MEDIA_ROOT", default=BASE_DIR / "media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -186,7 +184,7 @@ CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 RQ_QUEUES = {
     "default": {
         "URL": env("RQ_URL", default="redis://localhost:6379/0"),
-        "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=21600),
+        "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=360),
     },
     "low": {
         "URL": env("RQ_URL", default="redis://localhost:6379/0"),

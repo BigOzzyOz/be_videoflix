@@ -50,6 +50,9 @@ services:
       - redis
       - db
     restart: always
+    volumes:
+      - ./static:/app/static
+      - ./media:/app/media
 
 volumes:
   postgres_data:
