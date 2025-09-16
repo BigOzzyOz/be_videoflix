@@ -195,3 +195,7 @@ RQ_QUEUES = {
         "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=21600),  # 6 hours
     },
 }
+
+# Https settings
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
