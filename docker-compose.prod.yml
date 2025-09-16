@@ -1,17 +1,4 @@
 services:
-  rqscheduler:
-    build:
-      context: .
-      dockerfile: dockerfile
-    command: python manage.py rqscheduler
-    environment:
-      ENV: production
-      REDIS_URL: redis://redis:6379
-    env_file: .env.prod
-    depends_on:
-      - redis
-      - db
-    restart: always
   db:
     image: postgres:15-alpine
     restart: always
@@ -54,7 +41,7 @@ services:
     build:
       context: .
       dockerfile: dockerfile
-    command: python manage.py rqworker default low high
+    command: python manage.py rqworker default low high --with-scheduler
     environment:
       ENV: production
       REDIS_URL: redis://redis:6379
