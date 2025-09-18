@@ -1,5 +1,6 @@
 from django_filters import rest_framework as filters
 from django.utils import timezone
+from django.utils.timezone import localtime
 from app_videos.models import VideoFile
 from django.db.models import Max
 
@@ -34,8 +35,9 @@ class VideoFileFilter(filters.FilterSet):
         - If value is False: return only the most recently released video(s).
         - If no videos exist: return an empty queryset.
         """
+        now = localtime(timezone.now())
         if value:
-            return queryset.filter(video__release_date__gte=timezone.now() - timezone.timedelta(days=90))
+            return queryset.filter(video__release_date__gte=now - timezone.timedelta(days=90).date())
         latest_date = queryset.aggregate(latest=Max("video__release_date"))["latest"]
         if latest_date:
             return queryset.filter(video__release_date=latest_date)

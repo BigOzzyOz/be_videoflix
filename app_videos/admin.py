@@ -202,6 +202,7 @@ class GenreAdmin(admin.ModelAdmin):
     verbose_name_plural = "Genre"
     list_display = ("name", "video_count")
     search_fields = ("name",)
+    ordering = ("name",)
 
     def video_count(self, obj):
         """Return the number of videos for a genre."""
