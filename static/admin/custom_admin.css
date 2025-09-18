@@ -1,3 +1,53 @@
+/* Fieldsets und Formulare besser ans Farbschema anpassen */
+fieldset,
+.module,
+.grp-module {
+    background: #23263a !important;
+    border: 1px solid #2E3EDF !important;
+    color: #f3f3f3 !important;
+}
+
+legend,
+.grp-collapse .grp-collapse-handler {
+    background: #23263a !important;
+    color: #5a8fff !important;
+    border: none !important;
+    font-weight: bold;
+}
+
+.form-row,
+.grp-row {
+    background: transparent !important;
+    color: #f3f3f3 !important;
+}
+
+.form-row input,
+.form-row textarea,
+.form-row select,
+.grp-row input,
+.grp-row textarea,
+.grp-row select {
+    background: #181a20 !important;
+    color: #f3f3f3 !important;
+    border: 1px solid #2E3EDF !important;
+}
+
+.form-row label,
+.grp-row label {
+    color: #f3f3f3 !important;
+}
+
+.form-row .help,
+.grp-row .help {
+    color: #8fa2c7 !important;
+}
+
+.form-row .readonly,
+.grp-row .readonly {
+    color: #b0b0b0 !important;
+    background: #23263a !important;
+}
+
 body,
 .module,
 .dashboard-module,
