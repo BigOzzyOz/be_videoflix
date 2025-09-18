@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.utils.timezone import localtime
 from app_videos.models import VideoFile
 from django.db.models import Max
+from datetime import timedelta
 
 
 class CharInFilter(filters.BaseInFilter, filters.CharFilter):
@@ -37,7 +38,7 @@ class VideoFileFilter(filters.FilterSet):
         """
         now = localtime(timezone.now())
         if value:
-            return queryset.filter(video__release_date__gte=now - timezone.timedelta(days=90).date())
+            return queryset.filter(video__release_date__gte=(now - timedelta(days=90)).date())
         latest_date = queryset.aggregate(latest=Max("video__release_date"))["latest"]
         if latest_date:
             return queryset.filter(video__release_date=latest_date)

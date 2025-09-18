@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.utils.text import slugify
 from django.utils import timezone
+from django.utils.timezone import localtime
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
@@ -51,9 +52,10 @@ class VideoFileManager(models.Manager):
 
     def published_and_ready(self):
         """Return only published and ready video files."""
-        return self.filter(
-            is_ready=True, video__is_published=True, video__release_date__lte=timezone.now()
-        ).select_related("video")
+        now = localtime(timezone.now())
+        return self.filter(is_ready=True, video__is_published=True, video__release_date__lte=now).select_related(
+            "video"
+        )
 
 
 class VideoFile(models.Model):

@@ -12,19 +12,16 @@ def get_video_file_status(obj):
     uploading_found = False
     pending_found = False
 
-    # Prüfe failed jobs
     for job_id in queue.failed_job_registry.get_job_ids():
         job = queue.fetch_job(job_id)
         if job and job.args and str(obj.id) in [str(a) for a in job.args]:
             error_found = True
 
-    # Prüfe aktive (gestartete) Jobs
     for job_id in queue.started_job_registry.get_job_ids():
         job = queue.fetch_job(job_id)
         if job and job.args and str(obj.id) in [str(a) for a in job.args]:
             uploading_found = True
 
-    # Prüfe queued jobs
     for job in queue.jobs:
         if job.args and str(obj.id) in [str(a) for a in job.args]:
             if job.is_started or getattr(job, "status", None) == "started":
