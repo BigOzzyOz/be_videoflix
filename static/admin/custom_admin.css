@@ -3,32 +3,34 @@ body,
 .module,
 .dashboard-module,
 .grp-module {
-    background: #141414 !important;
+    background: #181a20 !important;
+    color: #f3f3f3 !important;
 }
 
 #header,
 .module caption,
 .grp-module caption {
     background: #2E3EDF !important;
-    color: #FFFFFF !important;
+    color: #fff !important;
 }
 
 #user-tools,
 .grp-user-tools {
     background: #2E3EDF !important;
-    color: #FFFFFF !important;
+    color: #fff !important;
 }
 
 #branding h1,
 .grp-branding h1 {
-    color: #D3D3D3 !important;
+    color: #fff !important;
 }
 
 /* Cards/Module Background */
 .module,
 .dashboard-module,
 .grp-module {
-    background: #1b1b22d9 !important;
+    background: #23263a !important;
+    color: #f3f3f3 !important;
 }
 
 /* Textfields */
@@ -36,8 +38,8 @@ input[type=text],
 input[type=password],
 textarea,
 select {
-    background: #1c1a20cc !important;
-    color: #FFFFFF !important;
+    background: #23263a !important;
+    color: #f3f3f3 !important;
     border: 1px solid #2E3EDF !important;
 }
 
@@ -47,7 +49,7 @@ input[type=submit],
 input[type=button],
 .grp-button {
     background: #2E3EDF !important;
-    color: #FFFFFF !important;
+    color: #fff !important;
     border: none !important;
     border-radius: 4px !important;
 }
@@ -55,7 +57,7 @@ input[type=button],
 /* Links */
 a,
 a:visited {
-    color: #2E3EDF !important;
+    color: #5a8fff !important;
 }
 
 /* Fehler */
