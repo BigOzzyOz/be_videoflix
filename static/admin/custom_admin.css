@@ -1,0 +1,67 @@
+/* Custom Admin Theme */
+body,
+.module,
+.dashboard-module,
+.grp-module {
+    background: #141414 !important;
+}
+
+#header,
+.module caption,
+.grp-module caption {
+    background: #2E3EDF !important;
+    color: #FFFFFF !important;
+}
+
+#user-tools,
+.grp-user-tools {
+    background: #2E3EDF !important;
+    color: #FFFFFF !important;
+}
+
+#branding h1,
+.grp-branding h1 {
+    color: #D3D3D3 !important;
+}
+
+/* Cards/Module Background */
+.module,
+.dashboard-module,
+.grp-module {
+    background: #1b1b22d9 !important;
+}
+
+/* Textfields */
+input[type=text],
+input[type=password],
+textarea,
+select {
+    background: #1c1a20cc !important;
+    color: #FFFFFF !important;
+    border: 1px solid #2E3EDF !important;
+}
+
+/* Buttons */
+.button,
+input[type=submit],
+input[type=button],
+.grp-button {
+    background: #2E3EDF !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 4px !important;
+}
+
+/* Links */
+a,
+a:visited {
+    color: #2E3EDF !important;
+}
+
+/* Fehler */
+.error,
+.grp-errors,
+.errornote,
+.errorlist li {
+    color: #FF002E !important;
+}
