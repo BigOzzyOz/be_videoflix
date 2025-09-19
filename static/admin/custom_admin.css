@@ -40,8 +40,6 @@ html[data-theme="light"] {
     --object-tools-fg: var(--button-fg);
     --object-tools-bg: var(--close-button-bg);
     --object-tools-hover-bg: var(--close-button-hover-bg);
-    --font-family-primary: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-    --font-family-monospace: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono', 'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro', 'Fira Mono', 'Droid Sans Mono', 'Courier New', monospace;
     color-scheme: light;
 }
 
@@ -87,8 +85,6 @@ html[data-theme="light"] {
         --object-tools-fg: var(--button-fg);
         --object-tools-bg: var(--close-button-bg);
         --object-tools-hover-bg: var(--close-button-hover-bg);
-        --font-family-primary: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-        --font-family-monospace: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono', 'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro', 'Fira Mono', 'Droid Sans Mono', 'Courier New', monospace;
         color-scheme: dark;
     }
 }
@@ -134,8 +130,6 @@ html[data-theme="dark"] {
     --object-tools-fg: var(--button-fg);
     --object-tools-bg: var(--close-button-bg);
     --object-tools-hover-bg: var(--close-button-hover-bg);
-    --font-family-primary: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-    --font-family-monospace: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono', 'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro', 'Fira Mono', 'Droid Sans Mono', 'Courier New', monospace;
     color-scheme: dark;
 }
 
