@@ -1,146 +1,25 @@
-/* Fieldsets und Formulare besser ans Farbschema anpassen */
-fieldset,
-.module,
-.grp-module {
-    background: #23263a !important;
-    border: 1px solid #2E3EDF !important;
-    color: #f3f3f3 !important;
-}
-
-legend,
-.grp-collapse .grp-collapse-handler {
-    background: #23263a !important;
-    color: #5a8fff !important;
-    border: none !important;
-    font-weight: bold;
-}
-
-.form-row,
-.grp-row {
-    background: transparent !important;
-    color: #f3f3f3 !important;
-}
-
-.form-row input,
-.form-row textarea,
-.form-row select,
-.grp-row input,
-.grp-row textarea,
-.grp-row select {
-    background: #181a20 !important;
-    color: #f3f3f3 !important;
-    border: 1px solid #2E3EDF !important;
-}
-
-.form-row label,
-.grp-row label {
-    color: #f3f3f3 !important;
-}
-
-.form-row .help,
-.grp-row .help {
-    color: #8fa2c7 !important;
-}
-
-.form-row .readonly,
-.grp-row .readonly {
-    color: #b0b0b0 !important;
-    background: #23263a !important;
-}
-
-body,
-.module,
-.dashboard-module,
-.grp-module {
-    background: #181a20 !important;
-    color: #f3f3f3 !important;
-}
-
-#header,
-.module caption,
-.grp-module caption {
-    background: #2E3EDF !important;
-    color: #181a20 !important;
-}
-
-.change-list .results thead th,
-.change-list .results thead td,
-.grp-changelist-results thead th {
-    background: #23263a !important;
-    color: #f3f3f3 !important;
-}
-
-.change-list-search,
-.grp-changelist-search {
-    background: #23263a !important;
-    color: #f3f3f3 !important;
-    border-radius: 6px !important;
-    border: 1px solid #2E3EDF !important;
-}
-
-.change-list-search input[type="text"],
-.grp-changelist-search input[type="text"] {
-    background: #181a20 !important;
-    color: #f3f3f3 !important;
-    border: 1px solid #2E3EDF !important;
-}
-
-#header .button,
-#header input[type=submit],
-#header input[type=button],
-#user-tools .button,
-#user-tools input[type=submit],
-#user-tools input[type=button] {
-    background: #fff !important;
-    color: #2E3EDF !important;
-    border: none !important;
-}
-
-#user-tools,
-.grp-user-tools {
-    background: #2E3EDF !important;
-    color: #fff !important;
-}
-
-#branding h1,
-.grp-branding h1 {
-    color: #fff !important;
-}
-
-.module,
-.dashboard-module,
-.grp-module {
-    background: #23263a !important;
-    color: #f3f3f3 !important;
-}
-
-input[type=text],
-input[type=password],
-textarea,
-select {
-    background: #23263a !important;
-    color: #f3f3f3 !important;
-    border: 1px solid #2E3EDF !important;
-}
-
-.button,
-input[type=submit],
-input[type=button],
-.grp-button {
-    background: #2E3EDF !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 4px !important;
-}
-
-a,
-a:visited {
-    color: #5a8fff !important;
-}
-
-.error,
-.grp-errors,
-.errornote,
-.errorlist li {
-    color: #FF002E !important;
+:root {
+    --primary: #2E3EDF;
+    --primary-fg: #ffffff;
+    --body-fg: #f3f3f3;
+    --body-bg: #181a20;
+    --body-quiet-color: #b0b0b0;
+    --body-medium-color: #8fa2c7;
+    --body-loud-color: #ffffff;
+    --breadcrumbs-link-fg: #b0cfff;
+    --breadcrumbs-bg: var(--primary);
+    --link-fg: #5a8fff;
+    --link-hover-color: #4ac1f7;
+    --link-selected-fg: #8fa2c7;
+    --hairline-color: #23263a;
+    --border-color: #23263a;
+    --error-fg: #FF002E;
+    --message-success-bg: #006b1b;
+    --message-warning-bg: #583305;
+    --message-error-bg: #570808;
+    --darkened-bg: #23263a;
+    --selected-bg: #23263a;
+    --selected-row: #2E3EDF22;
+    --close-button-bg: #333333;
+    --close-button-hover-bg: #666666;
 }
