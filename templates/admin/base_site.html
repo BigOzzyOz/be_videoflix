@@ -2,8 +2,8 @@
 {% load static %}
 {% block extrahead %}
   <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}" />
-  <link rel="stylesheet" type="text/css" href="{% static 'admin/custom_admin.css' %}" />
   {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static 'admin/custom_admin.css' %}" />
 {% endblock %}
 
 {% block branding %}
