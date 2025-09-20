@@ -9,31 +9,50 @@ services:
   redis:
     image: redis:7-alpine
     restart: always
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --timeout 0
 
   web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8002 --workers 3 --timeout 900
     environment:
       ENV: production
+      REDIS_URL: redis://redis:6379
     env_file: .env.prod
     ports:
       - "8002:8002"
     depends_on:
       - db
       - redis
+    volumes:
+      - ./static:/app/static
+      - ./media:/app/media
+    restart: always
 
   rqworker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
+    command: python manage.py rqworker default low high --with-scheduler
     environment:
       ENV: production
+      REDIS_URL: redis://redis:6379
     env_file: .env.prod
-    command: rqworker
     depends_on:
       - redis
       - db
+    restart: always
+    volumes:
+      - ./static:/app/static
+      - ./media:/app/media
 
 volumes:
   postgres_data:

@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.utils.html import format_html
 from .models import CustomUserModel, UserProfiles
 from app_videos.models import VideoProgress
 
@@ -11,7 +10,7 @@ class VideoProgressInline(admin.TabularInline):
     model = VideoProgress
     extra = 0
     readonly_fields = ("progress_percentage", "is_completed", "is_started", "last_watched")
-    fields = ("video_file", "current_time", "progress_percentage", "is_completed", "is_started", "last_watched")
+    fields = ("video_file", "current_time", "progress_percentage", "is_completed", "is_started")
     raw_id_fields = ("video_file",)
 
 
@@ -103,67 +102,3 @@ class UserProfileAdmin(admin.ModelAdmin):
 
     video_progress_count.short_description = "Video Progress"
     watch_time_display.short_description = "Watch Time"
-
-
-@admin.register(VideoProgress)
-class VideoProgressAdmin(admin.ModelAdmin):
-    """Admin for VideoProgress with progress bar display."""
-
-    list_display = (
-        "profile",
-        "video_title",
-        "language",
-        "progress_bar",
-        "current_time_display",
-        "is_completed",
-        "last_watched",
-    )
-    list_filter = ("is_completed", "is_started", "video_file__language", "last_watched")
-    search_fields = (
-        "profile__profile_name",
-        "profile__user__username",
-        "video_file__video__title",
-        "video_file__localized_title",
-    )
-    ordering = ("-last_watched",)
-    raw_id_fields = ("profile", "video_file")
-    readonly_fields = ("progress_percentage", "is_completed", "is_started")
-
-    fieldsets = (
-        ("References", {"fields": ("profile", "video_file")}),
-        ("Progress", {"fields": ("current_time", "progress_percentage", "is_completed", "is_started")}),
-        ("Timestamps", {"fields": ("last_watched", "created_at"), "classes": ("collapse",)}),
-    )
-
-    def video_title(self, obj):
-        """Returns the title of the video."""
-        return obj.video_file.display_title
-
-    def language(self, obj):
-        """Returns the language of the video."""
-        return obj.video_file.language.upper()
-
-    def progress_bar(self, obj):
-        """Visual progress bar as HTML."""
-        percentage = obj.progress_percentage
-        color = "#28a745" if obj.is_completed else "#007bff"
-        return format_html(
-            '<div style="width:100px; background:#e9ecef; border-radius:3px;">'
-            '<div style="width:{}%; background:{}; height:20px; border-radius:3px; text-align:center; color:white; font-size:12px; line-height:20px;">'
-            "{}%</div></div>",
-            min(percentage, 100),
-            color,
-            round(percentage, 1),
-        )
-
-    def current_time_display(self, obj):
-        """Formats the current time as MM:SS."""
-        total_seconds = int(obj.current_time)
-        minutes = total_seconds // 60
-        seconds = total_seconds % 60
-        return f"{minutes:02d}:{seconds:02d}"
-
-    video_title.short_description = "Video"
-    language.short_description = "Lang"
-    progress_bar.short_description = "Progress"
-    current_time_display.short_description = "Current Time"

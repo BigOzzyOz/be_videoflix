@@ -21,7 +21,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     command: python manage.py runserver 0.0.0.0:8000
     environment:
       ENV: development
@@ -40,7 +40,7 @@ services:
   rqworker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     command: python manage.py rqworker default low high --with-scheduler
     environment:
       ENV: development

@@ -1,8 +1,9 @@
 from django.test import TestCase
 from django.contrib.admin.sites import AdminSite
-from app_users.admin import CustomUserAdmin, UserProfileAdmin, VideoProgressAdmin
+from app_users.admin import CustomUserAdmin, UserProfileAdmin
 from app_users.models import CustomUserModel, UserProfiles
 from app_videos.models import Video, VideoFile, VideoProgress
+from app_videos.admin import VideoProgressAdmin
 
 
 class TestCustomUserAdmin(TestCase):

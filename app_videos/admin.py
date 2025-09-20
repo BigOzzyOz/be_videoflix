@@ -1,23 +1,31 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Video, VideoFile, Genres
+from .models import Video, VideoFile, Genres, VideoProgress
+from app_videos.utils import get_video_file_status
 
 
 class VideoFileInline(admin.TabularInline):
     """Inline admin for VideoFile objects in Video admin."""
 
     model = VideoFile
+    verbose_name = "Video File"
+    verbose_name_plural = "Video Files"
     extra = 1
-    readonly_fields = ("thumbnail_preview", "duration")
+    readonly_fields = ("thumbnail_preview", "duration_display", "status_display")
     fields = (
         "original_file",
         "language",
         "localized_title",
         "localized_description",
-        "is_ready",
+        "status_display",
         "thumbnail_preview",
-        "duration",
+        "duration_display",
     )
+
+    def status_display(self, obj):
+        return get_video_file_status(obj)
+
+    status_display.short_description = "Status"
 
     def thumbnail_preview(self, obj):
         """Return HTML img tag for thumbnail or '-' if not available."""
@@ -26,6 +34,17 @@ class VideoFileInline(admin.TabularInline):
         return "-"
 
     thumbnail_preview.short_description = "Thumbnail"
+
+    def duration_display(self, obj):
+        """Display duration in HH:MM:SS format or '-' if not set."""
+        if obj.duration:
+            hours = int(obj.duration // 3600)
+            minutes = int((obj.duration % 3600) // 60)
+            seconds = int(obj.duration % 60)
+            return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        return "-"
+
+    duration_display.short_description = "Duration"
 
 
 @admin.register(Video)
@@ -89,12 +108,23 @@ class VideoFileAdmin(admin.ModelAdmin):
         "video",
         "language",
         "display_title_admin",
-        "is_ready",
+        "status_display",
         "created_at",
         "thumbnail_preview",
-        "duration",
+        "duration_display",
     )
-    readonly_fields = ("thumbnail_preview", "duration", "display_title_admin", "display_description_admin")
+    readonly_fields = (
+        "thumbnail_preview",
+        "duration_display",
+        "display_title_admin",
+        "display_description_admin",
+        "status_display",
+    )
+
+    def status_display(self, obj):
+        return get_video_file_status(obj)
+
+    status_display.short_description = "Status"
     list_filter = ("is_ready", "language")
     search_fields = ("video__title", "localized_title", "localized_description")
     raw_id_fields = ("video",)
@@ -104,7 +134,16 @@ class VideoFileAdmin(admin.ModelAdmin):
         ("Video Reference", {"fields": ("video",)}),
         (
             "File Information",
-            {"fields": ("original_file", "language", "duration", "thumbnail", "thumbnail_preview", "preview_file")},
+            {
+                "fields": (
+                    "original_file",
+                    "language",
+                    "duration_display",
+                    "thumbnail",
+                    "thumbnail_preview",
+                    "preview_file",
+                )
+            },
         ),
         (
             "Localization",
@@ -118,7 +157,7 @@ class VideoFileAdmin(admin.ModelAdmin):
                 "description": "Language-specific title and description. If empty, defaults to video's main title/description.",
             },
         ),
-        ("HLS & Status", {"fields": ("hls_master_path", "is_ready")}),
+        ("HLS & Status", {"fields": ("hls_master_path", "status_display")}),
     )
 
     def thumbnail_preview(self, obj):
@@ -139,6 +178,17 @@ class VideoFileAdmin(admin.ModelAdmin):
             return f"🌐 {obj.localized_description[:100]}..."
         return f"📄 {obj.video.description[:100]}... (origin)"
 
+    def duration_display(self, obj):
+        """Display duration in HH:MM:SS format or '-' if not set."""
+        if obj.duration:
+            hours = int(obj.duration // 3600)
+            minutes = int((obj.duration % 3600) // 60)
+            seconds = int(obj.duration % 60)
+            return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        return "-"
+
+    duration_display.short_description = "Duration"
+
     thumbnail_preview.short_description = "Thumbnail"
     display_title_admin.short_description = "Effective Title"
     display_description_admin.short_description = "Effective Description"
@@ -148,11 +198,78 @@ class VideoFileAdmin(admin.ModelAdmin):
 class GenreAdmin(admin.ModelAdmin):
     """Admin configuration for Genres model."""
 
+    verbose_name = "Genres"
+    verbose_name_plural = "Genre"
     list_display = ("name", "video_count")
     search_fields = ("name",)
+    ordering = ("name",)
 
     def video_count(self, obj):
         """Return the number of videos for a genre."""
         return obj.videos.count()
 
     video_count.short_description = "Videos"
+
+
+@admin.register(VideoProgress)
+class VideoProgressAdmin(admin.ModelAdmin):
+    """Admin for VideoProgress with progress bar display."""
+
+    list_display = (
+        "profile",
+        "video_title",
+        "language",
+        "progress_bar",
+        "current_time_display",
+        "is_completed",
+        "last_watched",
+    )
+    list_filter = ("is_completed", "is_started", "video_file__language", "last_watched")
+    search_fields = (
+        "profile__profile_name",
+        "profile__user__username",
+        "video_file__video__title",
+        "video_file__localized_title",
+    )
+    ordering = ("-last_watched",)
+    raw_id_fields = ("profile", "video_file")
+    readonly_fields = ("progress_percentage", "is_completed", "is_started", "last_watched", "created_at")
+
+    fieldsets = (
+        ("References", {"fields": ("profile", "video_file")}),
+        ("Progress", {"fields": ("current_time", "progress_percentage", "is_completed", "is_started")}),
+        ("Timestamps", {"fields": ("last_watched", "created_at"), "classes": ("collapse",)}),
+    )
+
+    def video_title(self, obj):
+        """Returns the title of the video."""
+        return obj.video_file.display_title
+
+    def language(self, obj):
+        """Returns the language of the video."""
+        return obj.video_file.language.upper()
+
+    def progress_bar(self, obj):
+        """Visual progress bar as HTML."""
+        percentage = obj.progress_percentage
+        color = "#28a745" if obj.is_completed else "#007bff"
+        return format_html(
+            '<div style="width:100px; background:#e9ecef; border-radius:3px;">'
+            '<div style="width:{}%; background:{}; height:20px; border-radius:3px; text-align:center; color:white; font-size:12px; line-height:20px;">'
+            "{}%</div></div>",
+            min(percentage, 100),
+            color,
+            round(percentage, 1),
+        )
+
+    def current_time_display(self, obj):
+        """Formats the current time as MM:SS."""
+        total_seconds = int(obj.current_time)
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+        return f"{minutes:02d}:{seconds:02d}"
+
+    video_title.short_description = "Video"
+    language.short_description = "Lang"
+    progress_bar.short_description = "Progress"
+    current_time_display.short_description = "Current Time"

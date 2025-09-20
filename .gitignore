@@ -17,6 +17,7 @@ media/
 venv/
 env/
 .env*
+.venv*
 
 # Coverage
 coverage/

@@ -150,20 +150,19 @@ PASSWORD_RESET_TIMEOUT_HOURS = 24
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-FORCED_SCRIPT_NAME = env("FORCED_SCRIPT_NAME", default="/")
+FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME", default=None)
 
 STATIC_URL = env("STATIC_URL", default="/static/")
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+if DEBUG:
+    STATICFILES_DIRS = [BASE_DIR / "static"]
+else:
+    STATICFILES_DIRS = []
 
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = env("STATIC_ROOT", default=BASE_DIR / "staticfiles")
 
 MEDIA_URL = env("MEDIA_URL", default="/media/")
-
-MEDIA_ROOT = BASE_DIR / "media"
-
+MEDIA_ROOT = env("MEDIA_ROOT", default=BASE_DIR / "media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -177,6 +176,9 @@ EMAIL_USE_TLS = env("EMAIL_USE_TLS", default="False") == "True"
 EMAIL_USE_SSL = env("EMAIL_USE_SSL", default="False") == "True"
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
 
+
+# CSRF Trusted Origins
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 # RQ settings
 RQ_QUEUES = {
@@ -193,3 +195,7 @@ RQ_QUEUES = {
         "DEFAULT_TIMEOUT": env("RQ_DEFAULT_TIMEOUT", default=21600),  # 6 hours
     },
 }
+
+# Https settings
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

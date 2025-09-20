@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.utils.text import slugify
 from django.utils import timezone
+from django.utils.timezone import localtime
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
@@ -9,6 +10,10 @@ class Genres(models.Model):
     """Genre/category for videos."""
 
     name = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        verbose_name = "Genres"
+        verbose_name_plural = "Genre"
 
     def __str__(self):
         """String representation: genre name."""
@@ -47,9 +52,10 @@ class VideoFileManager(models.Manager):
 
     def published_and_ready(self):
         """Return only published and ready video files."""
-        return self.filter(
-            is_ready=True, video__is_published=True, video__release_date__lte=timezone.now()
-        ).select_related("video")
+        now = localtime(timezone.now())
+        return self.filter(is_ready=True, video__is_published=True, video__release_date__lte=now).select_related(
+            "video"
+        )
 
 
 class VideoFile(models.Model):
@@ -82,6 +88,8 @@ class VideoFile(models.Model):
     class Meta:
         unique_together = ("video", "language")
         ordering = ["-created_at"]
+        verbose_name = "Video File"
+        verbose_name_plural = "Video Files"
 
     def __str__(self):
         """String representation: video title and language."""
@@ -127,6 +135,8 @@ class VideoProgress(models.Model):
     class Meta:
         unique_together = ("profile", "video_file")
         ordering = ["-last_watched"]
+        verbose_name = "Video Progress"
+        verbose_name_plural = "Video Progress Entries"
 
     def save(self, *args, **kwargs):
         """Update progress, completion, and watch time on save."""

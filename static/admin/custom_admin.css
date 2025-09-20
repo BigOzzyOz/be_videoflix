@@ -1,0 +1,142 @@
+:root,
+html[data-theme="light"] {
+    --primary: #2E3EDF;
+    --secondary: #23263a;
+    --accent: #5a8fff;
+    --primary-fg: #fff;
+    --body-fg: #23263a;
+    --body-bg: #f7f8fa;
+    --body-quiet-color: #6b7a90;
+    --body-medium-color: #8fa2c7;
+    --body-loud-color: #23263a;
+    --header-color: #fff;
+    --header-branding-color: var(--primary);
+    --header-bg: var(--primary);
+    --header-link-color: var(--primary-fg);
+    --breadcrumbs-fg: #2E3EDF;
+    --breadcrumbs-link-fg: #2E3EDF;
+    --breadcrumbs-bg: #eaf0ff;
+    --link-fg: #2E3EDF;
+    --link-hover-color: #4ac1f7;
+    --link-selected-fg: #8fa2c7;
+    --hairline-color: #e0e0e0;
+    --border-color: #d0d7e2;
+    --error-fg: #FF002E;
+    --message-success-bg: #e6f9ed;
+    --message-warning-bg: #fff6e0;
+    --message-error-bg: #ffeaea;
+    --darkened-bg: #f0f4fa;
+    --selected-bg: #eaf0ff;
+    --selected-row: #eaf0ff;
+    --button-fg: #fff;
+    --button-bg: var(--primary);
+    --button-hover-bg: #5a8fff;
+    --default-button-bg: #5a8fff;
+    --default-button-hover-bg: var(--primary);
+    --close-button-bg: #e0e0e0;
+    --close-button-hover-bg: #b0b0b0;
+    --delete-button-bg: #FF002E;
+    --delete-button-hover-bg: #a41515;
+    --object-tools-fg: var(--button-fg);
+    --object-tools-bg: var(--close-button-bg);
+    --object-tools-hover-bg: var(--close-button-hover-bg);
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary: #2E3EDF;
+        --secondary: #23263a;
+        --accent: #5a8fff;
+        --primary-fg: #fff;
+        --body-fg: #f3f3f3;
+        --body-bg: #181a20;
+        --body-quiet-color: #b0b0b0;
+        --body-medium-color: #8fa2c7;
+        --body-loud-color: #ffffff;
+        --header-color: #fff;
+        --header-branding-color: var(--primary);
+        --header-bg: var(--primary);
+        --header-link-color: var(--primary-fg);
+        --breadcrumbs-fg: #b0cfff;
+        --breadcrumbs-link-fg: #b0cfff;
+        --breadcrumbs-bg: var(--primary);
+        --link-fg: #5a8fff;
+        --link-hover-color: #4ac1f7;
+        --link-selected-fg: #8fa2c7;
+        --hairline-color: #23263a;
+        --border-color: #23263a;
+        --error-fg: #FF002E;
+        --message-success-bg: #006b1b;
+        --message-warning-bg: #583305;
+        --message-error-bg: #570808;
+        --darkened-bg: #23263a;
+        --selected-bg: #23263a;
+        --selected-row: #2E3EDF22;
+        --button-fg: #fff;
+        --button-bg: var(--primary);
+        --button-hover-bg: #5a8fff;
+        --default-button-bg: #5a8fff;
+        --default-button-hover-bg: var(--primary);
+        --close-button-bg: #333333;
+        --close-button-hover-bg: #666666;
+        --delete-button-bg: #FF002E;
+        --delete-button-hover-bg: #a41515;
+        --object-tools-fg: var(--button-fg);
+        --object-tools-bg: var(--close-button-bg);
+        --object-tools-hover-bg: var(--close-button-hover-bg);
+        color-scheme: dark;
+    }
+}
+
+html[data-theme="dark"] {
+    --primary: #2E3EDF;
+    --secondary: #23263a;
+    --accent: #5a8fff;
+    --primary-fg: #fff;
+    --body-fg: #f3f3f3;
+    --body-bg: #181a20;
+    --body-quiet-color: #b0b0b0;
+    --body-medium-color: #8fa2c7;
+    --body-loud-color: #ffffff;
+    --header-color: #fff;
+    --header-branding-color: var(--primary);
+    --header-bg: var(--primary);
+    --header-link-color: var(--primary-fg);
+    --breadcrumbs-fg: #b0cfff;
+    --breadcrumbs-link-fg: #b0cfff;
+    --breadcrumbs-bg: var(--primary);
+    --link-fg: #5a8fff;
+    --link-hover-color: #4ac1f7;
+    --link-selected-fg: #8fa2c7;
+    --hairline-color: #23263a;
+    --border-color: #23263a;
+    --error-fg: #FF002E;
+    --message-success-bg: #006b1b;
+    --message-warning-bg: #583305;
+    --message-error-bg: #570808;
+    --darkened-bg: #23263a;
+    --selected-bg: #23263a;
+    --selected-row: #2E3EDF22;
+    --button-fg: #fff;
+    --button-bg: var(--primary);
+    --button-hover-bg: #5a8fff;
+    --default-button-bg: #5a8fff;
+    --default-button-hover-bg: var(--primary);
+    --close-button-bg: #333333;
+    --close-button-hover-bg: #666666;
+    --delete-button-bg: #FF002E;
+    --delete-button-hover-bg: #a41515;
+    --object-tools-fg: var(--button-fg);
+    --object-tools-bg: var(--close-button-bg);
+    --object-tools-hover-bg: var(--close-button-hover-bg);
+    color-scheme: dark;
+}
+
+#header,
+.module caption,
+.grp-module caption {
+    background: rgba(46, 62, 223, 0.98) !important;
+    color: #fff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}

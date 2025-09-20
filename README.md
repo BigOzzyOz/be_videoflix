@@ -8,7 +8,70 @@ Videoflix is a video streaming platform. This repository contains the backend se
 
 ## Frontend Application
 
-(Link to the frontend repository or deployed application will be added here)
+The frontend repository can be found here: [https://github.com/BigOzzyOz/videoflix](https://github.com/BigOzzyOz/videoflix)
+
+## Quick Start
+
+1. Copy `.example.env` to `.env` for local development.
+2. Run `docker-compose up` to start all services.
+3. Access the backend at [http://localhost:8000/](http://localhost:8000/) and the admin at [http://localhost:8000/admin/](http://localhost:8000/admin/).
+
+For production, use `.example.prod.env` and `docker-compose -f docker-compose.prod.yml up -d`.
+
+## Environment Variables (.env / .env.prod)
+
+Environment variables are required for running the project. Example files are provided as `.example.env` and `.example.prod.env` in the repository. Do not edit `.example.env` or `.example.prod.env` directly—always copy them to `.env` or `.env.prod` (which are gitignored) and edit those copies.
+
+**How to use:**
+
+1. Copy `.example.env` to `.env` for local development, or `.example.prod.env` to `.env.prod` for production.
+2. Adjust the values as needed (e.g. SECRET_KEY, database, email, etc.).
+3. The Docker Compose files will automatically load the appropriate .env file.
+
+**Important variables:**
+
+- `SECRET_KEY`: Django secret key (should be unique and secret)
+- `DEBUG`: `True` for development, `False` for production
+- `ALLOWED_HOSTS`: Comma-separated list of allowed hosts
+- `EMAIL_HOST`, `EMAIL_PORT`, ...: SMTP configuration
+- `FORCE_SCRIPT_NAME`, `STATIC_URL`, `MEDIA_URL`: Path configuration for deployment
+
+**.example.env (for local development):**
+
+```env
+SECRET_KEY=django-insecure-...your-key...
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+EMAIL_HOST=localhost
+EMAIL_PORT=1025
+EMAIL_HOST_USER=
+EMAIL_HOST_PASSWORD=
+EMAIL_USE_TLS=False
+EMAIL_USE_SSL=False
+DEFAULT_FROM_EMAIL=webmaster@localhost
+RQ_URL=redis://localhost:6379/0
+RQ_DEFAULT_TIMEOUT=360
+```
+
+**.example.prod.env (for production):**
+
+```env
+SECRET_KEY=your-secret-key
+DEBUG=False
+ALLOWED_HOSTS=yourserver.com
+EMAIL_HOST=smtp.yourserver.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=youruser
+EMAIL_HOST_PASSWORD=yourpassword
+EMAIL_USE_TLS=True
+EMAIL_USE_SSL=False
+DEFAULT_FROM_EMAIL=admin@yourserver.com
+RQ_URL=redis://redis:6379/0
+RQ_DEFAULT_TIMEOUT=360
+FORCE_SCRIPT_NAME=/be-videoflix
+STATIC_URL=/be-videoflix/static/
+MEDIA_URL=/be-videoflix/media/
+```
 
 ## Docker Setup
 
@@ -17,6 +80,20 @@ This project uses Docker for containerization. The `dockerfile` sets up the Pyth
 - The application exposes ports 8000 and 8002.
 - The environment variable `ENV` can be set to `development` or `production`.
 - The application is started using the `start.sh` script.
+
+The project can be run using Docker Compose.
+
+- **Development:**
+
+  ```bash
+  docker-compose up
+  ```
+
+- **Production:**
+
+  ```bash
+  docker-compose -f docker-compose.prod.yml up -d
+  ```
 
 ## Data Models
 
@@ -33,19 +110,39 @@ The application uses the following Django models:
 
 ## Running the Project
 
-The project can be run using Docker Compose.
+### Admin Access
 
-- **Development:**
+To create a Django admin user, run:
+
+```bash
+docker-compose exec web python manage.py createsuperuser
+```
+
+Then log in at [http://localhost:8000/admin/](http://localhost:8000/admin/)
+
+### Testing
+
+To run backend tests:
+
+```bash
+docker-compose exec web python manage.py test
+```
+
+## Troubleshooting
+
+- If you see migration errors, run:
 
   ```bash
-  docker-compose up
+  docker-compose exec web python manage.py migrate
   ```
 
-- **Production:**
+- For static file issues, run:
 
   ```bash
-  docker-compose -f docker-compose.prod.yml up -d
+  docker-compose exec web python manage.py collectstatic
   ```
+
+- If you change environment variables, restart the containers.
 
 ## Project Structure
 
