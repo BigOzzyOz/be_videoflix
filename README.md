@@ -27,6 +27,9 @@ Backend service for Videoflix, a video streaming platform. Built with Django and
   - [Troubleshooting](#troubleshooting)
   - [Project Structure](#project-structure)
   - [API Endpoints](#api-endpoints)
+    - [User Endpoints](#user-endpoints)
+    - [Video Endpoints](#video-endpoints)
+    - [Auth \& Miscellaneous](#auth--miscellaneous)
 
 ---
 
@@ -189,6 +192,20 @@ docker-compose exec web python manage.py test
 
 ## Troubleshooting
 
+- **General debugging:**
+
+  Check the logs of your containers to find the cause of errors:
+
+  ```bash
+  docker-compose logs web
+  ```
+
+  or for all containers:
+
+  ```bash
+  docker-compose logs
+  ```
+
 - **Migration errors:**
 
   ```bash
@@ -222,4 +239,59 @@ The project follows a standard Django structure:
 
 ## API Endpoints
 
-The application provides API endpoints for interacting with user and video data. These are defined within the `api/` subdirectories of `app_users` and `app_videos`. (Specific endpoint documentation can be added here later).
+The backend exposes a RESTful API for user and video management.
+
+**Tip:**
+Interactive API documentation is available via:
+
+> - [Swagger UI](http://localhost:8000/swagger/) (`/swagger/`)
+> - [Redoc](http://localhost:8000/redoc/) (`/redoc/`)
+
+All endpoints are prefixed with `/api/users/` or `/api/videos/`.
+
+---
+
+### User Endpoints
+
+**Base path:** `/api/users/`
+
+```http
+POST   /api/users/login/                         # Obtain JWT token (login)
+POST   /api/users/register/                      # Register a new user
+GET    /api/users/verify-email/<token>/          # Verify user email
+POST   /api/users/logout/                        # Logout user (JWT blacklist)
+POST   /api/users/password-reset/                # Request password reset
+POST   /api/users/password-reset/confirm/        # Confirm password reset
+GET    /api/users/me/                            # Get current user details
+
+# User profiles
+GET    /api/users/me/profiles/                   # List user profiles
+POST   /api/users/me/profiles/                   # Create a new user profile
+GET    /api/users/me/profiles/<profile_id>/      # Get a specific user profile
+PUT    /api/users/me/profiles/<profile_id>/      # Update a user profile
+PATCH  /api/users/me/profiles/<profile_id>/      # Partially update a user profile
+DELETE /api/users/me/profiles/<profile_id>/      # Delete a user profile
+
+# Video progress for profile
+POST   /api/users/me/profiles/<profile_id>/progress/<video_file_id>/update/  # Update video progress
+```
+
+### Video Endpoints
+
+**Base path:** `/api/videos/`
+
+```http
+GET    /api/videos/                  # List all videos
+GET    /api/videos/<video_id>/       # Retrieve details for a video
+GET    /api/videos/genre-count/      # Get count of videos per genre
+```
+
+### Auth & Miscellaneous
+
+```http
+POST   /api/token/refresh/           # Refresh JWT token
+POST   /api/token/verify/            # Verify JWT token
+```
+
+- Browsable API login: `/api-auth/`
+- Interactive API docs: `/swagger/` (Swagger UI), `/redoc/` (Redoc)
