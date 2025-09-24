@@ -24,6 +24,9 @@ Backend service for Videoflix, a video streaming platform. Built with Django and
   - [Running the Project](#running-the-project)
     - [Admin Access](#admin-access)
   - [Testing](#testing)
+  - [CI/CD \& Deployment](#cicd--deployment)
+    - [GitHub Actions: Automated Testing \& Production Deployment](#github-actions-automated-testing--production-deployment)
+      - [Production Deploy Setup](#production-deploy-setup)
   - [Troubleshooting](#troubleshooting)
   - [Project Structure](#project-structure)
   - [API Endpoints](#api-endpoints)
@@ -82,7 +85,7 @@ docker-compose -f docker-compose.prod.yml up -d --build
 
 ### 4. Database migrations
 
-**Note:** The `start.sh` script (used by Docker) automatically runs migrations. However, if you need to run them manually (e.g., during development or debugging), use:
+Run the initial database migrations:
 
 ```bash
 docker-compose exec web python manage.py makemigrations
@@ -189,6 +192,44 @@ To run backend tests:
 ```bash
 docker-compose exec web python manage.py test
 ```
+
+## CI/CD & Deployment
+
+### GitHub Actions: Automated Testing & Production Deployment
+
+This project uses GitHub Actions for CI/CD:
+
+- **CI (main branch):** Runs tests on every push or pull request.
+- **CD (prod branch):** Runs tests and deploys to your production server via SSH.
+
+#### Production Deploy Setup
+
+1. **Server SSH Key Setup**
+   - Log in to your server as the deploy user (e.g. `jh`).
+   - Add your public key to `~/.ssh/authorized_keys` (create the file if it doesn't exist).
+   - Set permissions:
+
+     ```sh
+     chmod 700 ~/.ssh
+     chmod 600 ~/.ssh/authorized_keys
+     ```
+
+2. **GitHub Repository Secrets**
+   - Go to: GitHub → Repository → Settings → Secrets and variables → Actions → New repository secret
+   - Add:
+     - `PROD_HOST` = your server's hostname or IP (e.g. `backend.jan-holtschke.de`)
+     - `PROD_USER` = your SSH username (e.g. `jh`)
+     - `PROD_SSH_KEY` = your private SSH key (e.g. from `~/.ssh/id_ed25519`)
+
+3. **Trigger Deployment**
+   - Push or open a pull request on the `prod` branch.
+   - The workflow will SSH into your server and run the deployment commands.
+
+**Security notes:**
+
+- Never share your private key.
+- The public key must be in `~/.ssh/authorized_keys` on the server.
+- GitHub secrets are used automatically by the workflow.
 
 ## Troubleshooting
 
