@@ -1,6 +1,37 @@
-# be_videoflix
 
-Videoflix Backend
+# Videoflix Backend (`be_videoflix`)
+
+Backend service for Videoflix, a video streaming platform. Built with Django and Django REST Framework. Handles user authentication, video management, and serves data to the frontend.
+
+---
+
+## Table of Contents
+
+- [Videoflix Backend (`be_videoflix`)](#videoflix-backend-be_videoflix)
+  - [Table of Contents](#table-of-contents)
+  - [Project Introduction](#project-introduction)
+  - [Frontend Application](#frontend-application)
+  - [Setup \& Installation](#setup--installation)
+    - [1. Clone the repository](#1-clone-the-repository)
+    - [2. Configure environment variables](#2-configure-environment-variables)
+    - [3. Build and start the services](#3-build-and-start-the-services)
+    - [4. Database migrations](#4-database-migrations)
+  - [Environment Variables (.env / .env.prod)](#environment-variables-env--envprod)
+  - [Docker Setup](#docker-setup)
+  - [Data Models](#data-models)
+    - [User Management (`app_users.models`)](#user-management-app_usersmodels)
+    - [Video Management (`app_videos.models`)](#video-management-app_videosmodels)
+  - [Running the Project](#running-the-project)
+    - [Admin Access](#admin-access)
+  - [Testing](#testing)
+  - [Troubleshooting](#troubleshooting)
+  - [Project Structure](#project-structure)
+  - [API Endpoints](#api-endpoints)
+    - [User Endpoints](#user-endpoints)
+    - [Video Endpoints](#video-endpoints)
+    - [Auth \& Miscellaneous](#auth--miscellaneous)
+
+---
 
 ## Project Introduction
 
@@ -10,17 +41,59 @@ Videoflix is a video streaming platform. This repository contains the backend se
 
 The frontend repository can be found here: [https://github.com/BigOzzyOz/videoflix](https://github.com/BigOzzyOz/videoflix)
 
-## Quick Start
+## Setup & Installation
 
-1. Copy `.example.env` to `.env` for local development.
-2. Run `docker-compose up` to start all services.
-3. Access the backend at [http://localhost:8000/](http://localhost:8000/) and the admin at [http://localhost:8000/admin/](http://localhost:8000/admin/).
+### 1. Clone the repository
 
-For production, use `.example.prod.env` and `docker-compose -f docker-compose.prod.yml up -d`.
+```bash
+git clone https://github.com/BigOzzyOz/be_videoflix.git
+cd be_videoflix
+```
+
+### 2. Configure environment variables
+
+Copy `.example.env` to `.env` for local development:
+
+```bash
+cp .example.env .env
+```
+
+Or for production:
+
+```bash
+cp .example.prod.env .env.prod
+```
+
+Edit the `.env` or `.env.prod` file as needed (see [Environment Variables](#environment-variables-env--envprod)).
+
+### 3. Build and start the services
+
+For development:
+
+```bash
+docker-compose up --build
+```
+
+For production:
+
+```bash
+docker-compose -f docker-compose.prod.yml up -d --build
+```
+
+### 4. Database migrations
+
+**Note:** The `start.sh` script (used by Docker) automatically runs migrations. However, if you need to run them manually (e.g., during development or debugging), use:
+
+```bash
+docker-compose exec web python manage.py makemigrations
+docker-compose exec web python manage.py migrate
+```
+
+---
 
 ## Environment Variables (.env / .env.prod)
 
-Environment variables are required for running the project. Example files are provided as `.example.env` and `.example.prod.env` in the repository. Do not edit `.example.env` or `.example.prod.env` directly—always copy them to `.env` or `.env.prod` (which are gitignored) and edit those copies.
+Environment variables are required for running the project. Example files are provided as `.example.env` and `.example.prod.env` in the repository. **Do not edit** `.example.env` or `.example.prod.env` directly—always copy them to `.env` or `.env.prod` (which are gitignored) and edit those copies.
 
 **How to use:**
 
@@ -35,6 +108,7 @@ Environment variables are required for running the project. Example files are pr
 - `ALLOWED_HOSTS`: Comma-separated list of allowed hosts
 - `EMAIL_HOST`, `EMAIL_PORT`, ...: SMTP configuration
 - `FORCE_SCRIPT_NAME`, `STATIC_URL`, `MEDIA_URL`: Path configuration for deployment
+- `BASE_URL`: The URL of your frontend. For local development, use your local frontend address (e.g. `http://localhost:4200/`). For production, use your deployed frontend domain (e.g. `https://videoflix.jan-holtschke.de`). This ensures that all links in emails (e.g. for verification or password reset) point to the correct frontend.
 
 **.example.env (for local development):**
 
@@ -79,21 +153,9 @@ This project uses Docker for containerization. The `dockerfile` sets up the Pyth
 
 - The application exposes ports 8000 and 8002.
 - The environment variable `ENV` can be set to `development` or `production`.
-- The application is started using the `start.sh` script.
+- The application is started using the `start.sh` script, which also runs migrations and collects static files.
 
-The project can be run using Docker Compose.
-
-- **Development:**
-
-  ```bash
-  docker-compose up
-  ```
-
-- **Production:**
-
-  ```bash
-  docker-compose -f docker-compose.prod.yml up -d
-  ```
+You can run the project using Docker Compose (see [Setup & Installation](#setup--installation)).
 
 ## Data Models
 
@@ -120,7 +182,7 @@ docker-compose exec web python manage.py createsuperuser
 
 Then log in at [http://localhost:8000/admin/](http://localhost:8000/admin/)
 
-### Testing
+## Testing
 
 To run backend tests:
 
@@ -130,19 +192,34 @@ docker-compose exec web python manage.py test
 
 ## Troubleshooting
 
-- If you see migration errors, run:
+- **General debugging:**
+
+  Check the logs of your containers to find the cause of errors:
 
   ```bash
+  docker-compose logs web
+  ```
+
+  or for all containers:
+
+  ```bash
+  docker-compose logs
+  ```
+
+- **Migration errors:**
+
+  ```bash
+  docker-compose exec web python manage.py makemigrations
   docker-compose exec web python manage.py migrate
   ```
 
-- For static file issues, run:
+- **Static file issues:**
 
   ```bash
   docker-compose exec web python manage.py collectstatic
   ```
 
-- If you change environment variables, restart the containers.
+- **Changed environment variables?** Restart the containers.
 
 ## Project Structure
 
@@ -162,4 +239,59 @@ The project follows a standard Django structure:
 
 ## API Endpoints
 
-The application provides API endpoints for interacting with user and video data. These are defined within the `api/` subdirectories of `app_users` and `app_videos`. (Specific endpoint documentation can be added here later).
+The backend exposes a RESTful API for user and video management.
+
+**Tip:**
+Interactive API documentation is available via:
+
+> - [Swagger UI](http://localhost:8000/swagger/) (`/swagger/`)
+> - [Redoc](http://localhost:8000/redoc/) (`/redoc/`)
+
+All endpoints are prefixed with `/api/users/` or `/api/videos/`.
+
+---
+
+### User Endpoints
+
+**Base path:** `/api/users/`
+
+```http
+POST   /api/users/login/                         # Obtain JWT token (login)
+POST   /api/users/register/                      # Register a new user
+GET    /api/users/verify-email/<token>/          # Verify user email
+POST   /api/users/logout/                        # Logout user (JWT blacklist)
+POST   /api/users/password-reset/                # Request password reset
+POST   /api/users/password-reset/confirm/        # Confirm password reset
+GET    /api/users/me/                            # Get current user details
+
+# User profiles
+GET    /api/users/me/profiles/                   # List user profiles
+POST   /api/users/me/profiles/                   # Create a new user profile
+GET    /api/users/me/profiles/<profile_id>/      # Get a specific user profile
+PUT    /api/users/me/profiles/<profile_id>/      # Update a user profile
+PATCH  /api/users/me/profiles/<profile_id>/      # Partially update a user profile
+DELETE /api/users/me/profiles/<profile_id>/      # Delete a user profile
+
+# Video progress for profile
+POST   /api/users/me/profiles/<profile_id>/progress/<video_file_id>/update/  # Update video progress
+```
+
+### Video Endpoints
+
+**Base path:** `/api/videos/`
+
+```http
+GET    /api/videos/                  # List all videos
+GET    /api/videos/<video_id>/       # Retrieve details for a video
+GET    /api/videos/genre-count/      # Get count of videos per genre
+```
+
+### Auth & Miscellaneous
+
+```http
+POST   /api/token/refresh/           # Refresh JWT token
+POST   /api/token/verify/            # Verify JWT token
+```
+
+- Browsable API login: `/api-auth/`
+- Interactive API docs: `/swagger/` (Swagger UI), `/redoc/` (Redoc)

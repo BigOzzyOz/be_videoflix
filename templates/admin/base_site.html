@@ -7,12 +7,14 @@
 {% endblock %}
 
 {% block branding %}
-  <h1 id="site-name" style="display:flex;align-items:center;gap:10px;">
-    <img src="{% static 'admin/logo.svg' %}" alt="Logo" style="height:32px;width:32px;vertical-align:middle;" />
-    <a href="/be-videoflix/admin/">Videoflix Administration</a>
-    <span style="flex:1"></span>
-    <a href="/be-videoflix/django-rq/" style="font-size:14px;margin-left:16px;">RQ Dashboard</a>
-    <a href="/be-videoflix/swagger/" style="font-size:14px;margin-left:8px;">API Docs</a>
-    <a href="/be-videoflix/redoc/" style="font-size:14px;margin-left:8px;">ReDoc</a>
-  </h1>
+  {% with script_name=settings.FORCE_SCRIPT_NAME|default:'' %}
+    <h1 id="site-name" style="display:flex;align-items:center;gap:10px;">
+      <img src="{% static 'admin/logo.svg' %}" alt="Logo" style="height:32px;width:32px;vertical-align:middle;" />
+      <a href="{{ script_name|default:'' }}/admin/">Videoflix Administration</a>
+      <span style="flex:1"></span>
+      <a href="{{ script_name|default:'' }}/django-rq/" style="font-size:14px;margin-left:16px;">RQ Dashboard</a>
+      <a href="{{ script_name|default:'' }}/swagger/" style="font-size:14px;margin-left:8px;">API Docs</a>
+      <a href="{{ script_name|default:'' }}/redoc/" style="font-size:14px;margin-left:8px;">ReDoc</a>
+    </h1>
+  {% endwith %}
 {% endblock %}
