@@ -36,6 +36,7 @@ jobs:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USER }}
           key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_PORT }}
           script: |
             cd /srv/backends/be_videoflix/
             git pull --rebase
