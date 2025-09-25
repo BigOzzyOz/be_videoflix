@@ -1,6 +1,7 @@
 from pathlib import Path
 import environ
 from datetime import timedelta
+import sentry_sdk
 
 # Set up environment variables
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -201,3 +202,11 @@ RQ_QUEUES = {
 # Https settings
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+
+sentry_sdk.init(
+    dsn="https://ffd04e12340f0893919868e181a722e2@o4510077623599104.ingest.de.sentry.io/4510077631791184",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+)
