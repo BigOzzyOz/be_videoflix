@@ -1,5 +1,5 @@
 {% extends 'admin/base.html' %}
-{% load static %}
+{% load static script_name %}
 {% block extrahead %}
   <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}" />
   {{ block.super }}
@@ -7,14 +7,12 @@
 {% endblock %}
 
 {% block branding %}
-  {% with script_name=settings.FORCE_SCRIPT_NAME|default:'' %}
-    <h1 id="site-name" style="display:flex;align-items:center;gap:10px;">
-      <img src="{% static 'admin/logo.svg' %}" alt="Logo" style="height:32px;width:32px;vertical-align:middle;" />
-      <a href="{{ script_name|default:'' }}/admin/">Videoflix Administration</a>
-      <span style="flex:1"></span>
-      <a href="{{ script_name|default:'' }}/django-rq/" style="font-size:14px;margin-left:16px;">RQ Dashboard</a>
-      <a href="{{ script_name|default:'' }}/swagger/" style="font-size:14px;margin-left:8px;">API Docs</a>
-      <a href="{{ script_name|default:'' }}/redoc/" style="font-size:14px;margin-left:8px;">ReDoc</a>
-    </h1>
-  {% endwith %}
+  <h1 id="site-name" style="display:flex;align-items:center;gap:10px;">
+    <img src="{% static 'admin/logo.svg' %}" alt="Logo" style="height:32px;width:32px;vertical-align:middle;" />
+    <a href="{% script_name %}/admin/">Videoflix Administration</a>
+    <span style="flex:1"></span>
+    <a href="{% script_name %}/django-rq/" style="font-size:14px;margin-left:16px;">RQ Dashboard</a>
+    <a href="{% script_name %}/swagger/" style="font-size:14px;margin-left:8px;">API Docs</a>
+    <a href="{% script_name %}/redoc/" style="font-size:14px;margin-left:8px;">ReDoc</a>
+  </h1>
 {% endblock %}
